@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"hime-backend/db"
 	"hime-backend/models"
+	"hime-backend/repository"
 	"strconv"
 
 	"github.com/gofiber/fiber/v3"
@@ -185,13 +186,8 @@ func GetSocieties(c fiber.Ctx) error {
 	})
 }
 
-type blocksCollector struct {
-	BlockNames []string `json:"block_names"`
-	SocietyID  int32    `json:"society_id"`
-}
-
 func BulkInsertBlocks(c fiber.Ctx) error {
-	var body blocksCollector
+	var body models.BlocksCollector
 
 	if err := c.Bind().Body(&body); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
@@ -205,45 +201,8 @@ func BulkInsertBlocks(c fiber.Ctx) error {
 		})
 	}
 
-	context := context.Background()
-	conn, err := db.PGPool.Acquire(context)
+	err := repository.BulkInsertBlocks(body)
 	if err != nil {
-		// fmt.Printf("!! failed to acquire db conn.: %w", err)
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": "internal server error",
-		})
-	}
-	defer conn.Release()
-
-	tx, err := conn.Begin(context)
-	if err != nil {
-		// fmt.Printf("!! failed to start txn: %w", err)
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": "internal server error",
-		})
-	}
-
-	batch := &pgx.Batch{}
-
-	for _, name := range body.BlockNames {
-		batch.Queue("INSERT INTO blocks (name, society_id) VALUES ($1, $2)",
-			name, body.SocietyID,
-		)
-	}
-
-	br := tx.SendBatch(context, batch)
-	err = br.Close()
-	if err != nil {
-		tx.Rollback(context)
-		// fmt.Errorf("failed to execute batch insert: %w", err)
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": "internal server error",
-		})
-	}
-
-	err = tx.Commit(context)
-	if err != nil {
-		// fmt.Printf("failed to commit transaction: %w", err)
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": "internal server error",
 		})
@@ -254,14 +213,8 @@ func BulkInsertBlocks(c fiber.Ctx) error {
 	})
 }
 
-type residencesCollector struct {
-	ResidenceNumbers []int32 `json:"residence_numbers"`
-	SocietyID        int32   `json:"society_id"`
-	BlockID          int32   `json:"block_id"`
-}
-
 func BulkInsertResidences(c fiber.Ctx) error {
-	var body residencesCollector
+	var body models.ResidencesCollector
 
 	if err := c.Bind().Body(&body); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
@@ -275,45 +228,8 @@ func BulkInsertResidences(c fiber.Ctx) error {
 		})
 	}
 
-	context := context.Background()
-	conn, err := db.PGPool.Acquire(context)
+	err := repository.BulkInsertResidences(body)
 	if err != nil {
-		// fmt.Printf("!! failed to acquire db conn.: %w", err)
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": "internal server error",
-		})
-	}
-	defer conn.Release()
-
-	tx, err := conn.Begin(context)
-	if err != nil {
-		// fmt.Printf("!! failed to start txn: %w", err)
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": "internal server error",
-		})
-	}
-
-	batch := &pgx.Batch{}
-
-	for _, number := range body.ResidenceNumbers {
-		batch.Queue("INSERT INTO residences (number, block_id, society_id) VALUES ($1, $2, $3)",
-			number, body.BlockID, body.SocietyID,
-		)
-	}
-
-	br := tx.SendBatch(context, batch)
-	err = br.Close()
-	if err != nil {
-		tx.Rollback(context)
-		// fmt.Errorf("failed to execute batch insert: %w", err)
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": "internal server error",
-		})
-	}
-
-	err = tx.Commit(context)
-	if err != nil {
-		// fmt.Printf("failed to commit transaction: %w", err)
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": "internal server error",
 		})
