@@ -27,7 +27,7 @@ CREATE TABLE societies
 CREATE TABLE blocks
 (
     id         SERIAL PRIMARY KEY,
-    name       VARCHAR UNIQUE NOT NULL,
+    name       VARCHAR NOT NULL,
     society_id INT            NOT NULL,
     CONSTRAINT fk_society FOREIGN KEY (society_id) REFERENCES societies (id)
 );
@@ -94,11 +94,13 @@ CREATE TABLE visitors
 
 -- visits
 CREATE TYPE visit_status as ENUM ('accepted','rejected','pre-approved','security cleared');
-CREATE TABLE visits
+CREATE TABLE residence_visits
 (
     id           SERIAL PRIMARY KEY,
     residence_id INT          NOT NULL,
     CONSTRAINT fk_residence FOREIGN KEY (residence_id) REFERENCES residences (id),
+    visitor_id   UUID         NOT NULL,
+    CONSTRAINT fk_visitor FOREIGN KEY (visitor_id) REFERENCES visitors (id),
     status       VISIT_STATUS NOT NULL,
     arrival_time TIMESTAMP WITH TIME ZONE DEFAULT now(),
     exit_time    TIMESTAMP WITH TIME ZONE
