@@ -81,3 +81,33 @@ func BulkInsertResidences(data models.ResidencesCollector) error {
 
 	return nil
 }
+
+func InsertVisitor(visitor models.VisitorCollector) (int, error) {
+	var id int
+	query := "INSERT INTO visitors (name, mobile, photo) VALUES ($1, $2, $3) RETURNING id"
+	err := db.PGPool.QueryRow(context.Background(), query, visitor.Name, visitor.Mobile, visitor.Photo).Scan(&id)
+	if err != nil {
+		return 0, err
+	}
+	return id, nil
+}
+
+func GetVisitorIDByMobile(mobile string) (int, error) {
+	var visitorID int
+	query := "SELECT id FROM visitors v WHERE v.mobile = $1"
+	err := db.PGPool.QueryRow(context.Background(), query).Scan(&visitorID)
+	if err != nil {
+		return 0, err
+	}
+	return visitorID, nil
+}
+
+func InsertResidenceVisit(visit models.VisitCollector) (int, error) {
+	var id int
+	query := "INSERT INTO visits (residence_id, visitor_id, status) VALUES ($1, $2, $3) RETURNING id"
+	err := db.PGPool.QueryRow(context.Background(), query, visit.ResidenceID, visit.VisitorID, visit.Status).Scan(&id)
+	if err != nil {
+		return 0, err
+	}
+	return id, nil
+}
