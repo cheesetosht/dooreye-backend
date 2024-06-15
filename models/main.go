@@ -96,16 +96,16 @@ func (ns NullVisitStatus) Value() (driver.Value, error) {
 }
 
 type Agent struct {
-	ID        uuid.UUID
-	Name      string
-	Mobile    string
-	SocietyID int32
+	ID        uuid.UUID `json:"id"`
+	Name      string    `json:"name"`
+	Mobile    string    `json:"mobile"`
+	SocietyID int32     `json:"society_id"`
 }
 
 type Block struct {
-	ID        int32
-	Name      string
-	SocietyID int32
+	ID        int32  `json:"id"`
+	Name      string `json:"name"`
+	SocietyID int32  `json:"society_id"`
 }
 
 type City struct {
@@ -118,47 +118,47 @@ type City struct {
 }
 
 type Residence struct {
-	ID        int32
-	Number    int32
-	SocietyID int32
-	BlockID   sql.NullInt32
-	CreatedAt sql.NullTime
-	UpdatedAt sql.NullTime
+	ID        int32         `json:"id"`
+	Number    int32         `json:"number"`
+	SocietyID int32         `json:"society_id"`
+	BlockID   sql.NullInt32 `json:"block_id"`
+	CreatedAt sql.NullTime  `json:"created_at"`
+	UpdatedAt sql.NullTime  `json:"updated_at"`
 }
 
 type Resident struct {
-	ID          string
-	ResidenceID int32
-	IsPrimary   bool
-	IsActive    bool
-	CreatedAt   sql.NullTime
-	UpdatedAt   sql.NullTime
+	ID          string       `json:"id"`
+	ResidenceID int32        `json:"residence_id"`
+	IsPrimary   bool         `json:"is_primary"`
+	IsValid     bool         `json:"is_valid"`
+	CreatedAt   sql.NullTime `json:"created_at"`
+	UpdatedAt   sql.NullTime `json:"updated_at"`
 }
 
 type Society struct {
-	ID            int32
-	Name          string
-	Developer     string
-	MaxResidences int32
-	CityID        int32
-	IsActive      bool
-	CreatedAt     sql.NullTime
-	UpdatedAt     sql.NullTime
+	ID            int32        `json:"id"`
+	Name          string       `json:"name"`
+	Developer     string       `json:"developer"`
+	MaxResidences int32        `json:"max_residences"`
+	CityID        int32        `json:"city_id"`
+	IsValid       bool         `json:"is_valid"`
+	CreatedAt     sql.NullTime `json:"created_at"`
+	UpdatedAt     sql.NullTime `json:"updated_at"`
 }
 
 type Visit struct {
-	ID          int32
-	ResidenceID int32
-	Status      VisitStatus
-	ArrivalTime sql.NullTime
-	ExitTime    sql.NullTime
+	ID          int32        `json:"id"`
+	ResidenceID int32        `json:"residence_id"`
+	Status      VisitStatus  `json:"status"`
+	ArrivalTime sql.NullTime `json:"arrival_time"`
+	ExitTime    sql.NullTime `json:"exit_time"`
 }
 
 type Visitor struct {
-	ID        uuid.UUID
-	Name      string
-	Mobile    string
-	Photo     sql.NullString
-	CreatedAt sql.NullTime
-	UpdatedAt sql.NullTime
+	ID        uuid.UUID      `json:"id"`
+	Name      string         `json:"name"`
+	Mobile    string         `json:"mobile"`
+	Photo     sql.NullString `json:"photo"`
+	CreatedAt sql.NullTime   `json:"created_at"`
+	UpdatedAt sql.NullTime   `json:"updated_at"`
 }
