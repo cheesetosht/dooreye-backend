@@ -25,6 +25,11 @@ func main() {
 	})
 	app.Get("/cities", handler.GetCities)
 	// app.Post("/cities", handler.InsertCity)
+	app.Post("/societies", handler.InsertSociety)
+	app.Get("/societies", handler.GetSocieties)
+	app.Post("/blocks/bulk", handler.BulkInsertBlocks)
+	app.Post("/residences/bulk", handler.BulkInsertResidences)
+
 	log.Fatal(app.Listen(":8080"))
 
 	defer db.ClosePG()
