@@ -3,6 +3,7 @@ package db
 import (
 	"context"
 	"log"
+	"os"
 	"sync"
 	"time"
 
@@ -23,8 +24,7 @@ func config() *pgxpool.Config {
 	const defaultHealthCheckPeriod = time.Minute
 	const defaultConnectTimeout = time.Second * 5
 
-	// const DATABASE_URL string = os.Getenv("DATABASE_URL")
-	const DATABASE_URL string = "postgres://postgres:sEcReT@localhost:5432/postgres"
+	DATABASE_URL := os.Getenv("DATABASE_URL")
 
 	dbConfig, err := pgxpool.ParseConfig(DATABASE_URL)
 	if err != nil {
