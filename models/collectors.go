@@ -11,6 +11,11 @@ type ResidencesCollector struct {
 	BlockID          int32   `json:"block_id"`
 }
 
+type ResidentCollector struct {
+	ResidenceID int32 `json:"residence_id"`
+	IsPrimary   bool  `json:"is_primary"`
+}
+
 type VisitorCollector struct {
 	Name   string
 	Mobile string
@@ -18,7 +23,7 @@ type VisitorCollector struct {
 }
 
 type VisitCollector struct {
-	ResidenceID string      `json:"residence_id"`
+	ResidenceID int32       `json:"residence_id"`
 	VisitorID   string      `json:"visitor_id"`
 	Status      VisitStatus `json:"status"`
 }

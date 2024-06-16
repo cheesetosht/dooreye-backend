@@ -124,7 +124,9 @@ func InsertSociety(c fiber.Ctx) error {
 
 	return c.Status(fiber.StatusCreated).JSON(fiber.Map{
 		"success": true,
-		"data":    id,
+		"data": fiber.Map{
+			"id": id,
+		},
 	})
 }
 
@@ -237,5 +239,36 @@ func BulkInsertResidences(c fiber.Ctx) error {
 
 	return c.Status(fiber.StatusCreated).JSON(fiber.Map{
 		"success": true,
+	})
+}
+
+func InsertResident(c fiber.Ctx) error {
+	var resident models.ResidentCollector
+
+	if err := c.Bind().Body(&resident); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "invalid input",
+		})
+	}
+
+	if resident.ResidenceID == 0 {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "all fields are required",
+		})
+	}
+
+	id, err := repository.InsertResident(resident)
+	if err != nil {
+		fmt.Println(err)
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "internal server error",
+		})
+	}
+
+	return c.Status(fiber.StatusCreated).JSON(fiber.Map{
+		"success": true,
+		"data": fiber.Map{
+			"id": id,
+		},
 	})
 }

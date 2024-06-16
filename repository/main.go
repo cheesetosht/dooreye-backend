@@ -102,6 +102,16 @@ func GetVisitorIDByMobile(mobile string) (int, error) {
 	return visitorID, nil
 }
 
+func InsertResident(resident models.ResidentCollector) (string, error) {
+	var id string
+	query := `INSERT INTO residents (residence_id, is_primary) VALUES ($1, $2) RETURNING id`
+	err := db.PGPool.QueryRow(context.Background(), query, resident.ResidenceID, resident.IsPrimary).Scan(&id)
+	if err != nil {
+		return "", err
+	}
+	return id, nil
+}
+
 func InsertResidenceVisit(visit models.VisitCollector) (int, error) {
 	var id int
 	query := "INSERT INTO visits (residence_id, visitor_id, status) VALUES ($1, $2, $3) RETURNING id"
