@@ -6,6 +6,7 @@ import (
 	"hime-backend/db"
 	"hime-backend/models"
 	"hime-backend/repository"
+	"hime-backend/utility"
 	"strconv"
 
 	"github.com/gofiber/fiber/v3"
@@ -271,4 +272,37 @@ func InsertResident(c fiber.Ctx) error {
 			"id": id,
 		},
 	})
+}
+
+func CreateVisit(c fiber.Ctx) error {
+	form, err := c.MultipartForm()
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "!! failed to parse formdata",
+		})
+	}
+
+	files := form.File["visitor_photo"]
+
+	if len(files) == 0 {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "!! no file uploaded",
+		})
+	}
+
+	visitorPhoto := files[0]
+	file, err := visitorPhoto.Open()
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "!! failed to read file",
+		})
+	}
+
+	utility.UploadFileToS3(file, visitorPhoto, "visitor_photos")
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "!! failed to read file",
+		})
+	}
+
 }

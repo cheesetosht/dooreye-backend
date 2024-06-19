@@ -49,7 +49,7 @@ func config() *pgxpool.Config {
 	}
 
 	dbConfig.BeforeClose = func(c *pgx.Conn) {
-		log.Println("> closed the connection pool to the database")
+		log.Println("> closed db conn. pool")
 	}
 
 	return dbConfig
