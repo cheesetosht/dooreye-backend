@@ -73,14 +73,14 @@ func GetCities(c fiber.Ctx) error {
 	query := `SELECT id, name, state FROM cities c WHERE lower(c.name) LIKE $1 LIMIT $2 OFFSET $3;`
 	rows, err := db.PGPool.Query(context.Background(), query, fmt.Sprintf("%s%%", searchStr), limit, offset)
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": "internal server error",
 		})
 	}
 
 	cities, err := pgx.CollectRows(rows, pgx.RowToAddrOfStructByPos[cityPresenter])
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": "internal server error",
 		})
 	}
@@ -170,14 +170,14 @@ func GetSocieties(c fiber.Ctx) error {
 	rows, err := db.PGPool.Query(context.Background(), query, fmt.Sprintf("%s%%", searchStr), limit, offset)
 	if err != nil {
 		fmt.Println(err)
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": "internal server error",
 		})
 	}
 
 	societies, err := pgx.CollectRows(rows, pgx.RowToAddrOfStructByPos[societyPresenter])
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": "internal server error",
 		})
 	}

@@ -19,7 +19,7 @@ func init() {
 	if err != nil {
 		log.Fatalf("!! error loading .env file")
 	}
-	envVars := []string{"PORT", "DATABASE_URL"}
+	envVars := []string{"PORT", "DATABASE_URL", "JWT_SECRET"}
 	utility.ValidateEnv(envVars)
 	log.Println("> start program")
 }
