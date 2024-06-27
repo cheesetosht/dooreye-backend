@@ -4,102 +4,50 @@ import (
 	"database/sql"
 	"database/sql/driver"
 	"fmt"
-
-	"github.com/google/uuid"
 )
 
-type AgentRole string
+type ResidenceVisitStatus string
 
 const (
-	AgentRoleAdmin    AgentRole = "admin"
-	AgentRoleManager  AgentRole = "manager"
-	AgentRoleSecurity AgentRole = "security"
+	ResidenceVisitStatusAccepted        ResidenceVisitStatus = "accepted"
+	ResidenceVisitStatusRejected        ResidenceVisitStatus = "rejected"
+	ResidenceVisitStatusPreApproved     ResidenceVisitStatus = "pre-approved"
+	ResidenceVisitStatusSecuritycleared ResidenceVisitStatus = "security cleared"
 )
 
-func (e *AgentRole) Scan(src interface{}) error {
+func (e *ResidenceVisitStatus) Scan(src interface{}) error {
 	switch s := src.(type) {
 	case []byte:
-		*e = AgentRole(s)
+		*e = ResidenceVisitStatus(s)
 	case string:
-		*e = AgentRole(s)
+		*e = ResidenceVisitStatus(s)
 	default:
-		return fmt.Errorf("!! unsupported scan type for AgentRole: %T", src)
+		return fmt.Errorf("unsupported scan type for ResidenceVisitStatus: %T", src)
 	}
 	return nil
 }
 
-type NullAgentRole struct {
-	AgentRole AgentRole
-	Valid     bool // Valid is true if AgentRole is not NULL
+type NullResidenceVisitStatus struct {
+	ResidenceVisitStatus ResidenceVisitStatus
+	Valid                bool // Valid is true if ResidenceVisitStatus is not NULL
 }
 
 // Scan implements the Scanner interface.
-func (ns *NullAgentRole) Scan(value interface{}) error {
+func (ns *NullResidenceVisitStatus) Scan(value interface{}) error {
 	if value == nil {
-		ns.AgentRole, ns.Valid = "", false
+		ns.ResidenceVisitStatus, ns.Valid = "", false
 		return nil
 	}
 	ns.Valid = true
-	return ns.AgentRole.Scan(value)
+	return ns.ResidenceVisitStatus.Scan(value)
 }
 
 // Value implements the driver Valuer interface.
-func (ns NullAgentRole) Value() (driver.Value, error) {
+func (ns NullResidenceVisitStatus) Value() (driver.Value, error) {
 	if !ns.Valid {
 		return nil, nil
 	}
-	return string(ns.AgentRole), nil
-}
-
-type VisitStatus string
-
-const (
-	VisitStatusAccepted        VisitStatus = "accepted"
-	VisitStatusRejected        VisitStatus = "rejected"
-	VisitStatusPreApproved     VisitStatus = "pre-approved"
-	VisitStatusSecuritycleared VisitStatus = "security cleared"
-)
-
-func (e *VisitStatus) Scan(src interface{}) error {
-	switch s := src.(type) {
-	case []byte:
-		*e = VisitStatus(s)
-	case string:
-		*e = VisitStatus(s)
-	default:
-		return fmt.Errorf("!! unsupported scan type for VisitStatus: %T", src)
-	}
-	return nil
-}
-
-type NullVisitStatus struct {
-	VisitStatus VisitStatus
-	Valid       bool // Valid is true if VisitStatus is not NULL
-}
-
-// Scan implements the Scanner interface.
-func (ns *NullVisitStatus) Scan(value interface{}) error {
-	if value == nil {
-		ns.VisitStatus, ns.Valid = "", false
-		return nil
-	}
-	ns.Valid = true
-	return ns.VisitStatus.Scan(value)
-}
-
-// Value implements the driver Valuer interface.
-func (ns NullVisitStatus) Value() (driver.Value, error) {
-	if !ns.Valid {
-		return nil, nil
-	}
-	return string(ns.VisitStatus), nil
-}
-
-type Agent struct {
-	ID        uuid.UUID `json:"id"`
-	Name      string    `json:"name"`
-	Mobile    string    `json:"mobile"`
-	SocietyID int32     `json:"society_id"`
+	return string(ns.ResidenceVisitStatus), nil
 }
 
 type Block struct {
@@ -126,36 +74,45 @@ type Residence struct {
 	UpdatedAt sql.NullTime  `json:"updated_at"`
 }
 
-type Resident struct {
-	ID          string       `json:"id"`
-	ResidenceID int32        `json:"residence_id"`
-	IsPrimary   bool         `json:"is_primary"`
-	IsValid     bool         `json:"is_valid"`
-	CreatedAt   sql.NullTime `json:"created_at"`
-	UpdatedAt   sql.NullTime `json:"updated_at"`
+type ResidenceVisit struct {
+	ID          int32                `json:"id"`
+	ResidenceID int32                `json:"residence_id"`
+	Status      ResidenceVisitStatus `json:"status"`
+	ArrivalTime sql.NullTime         `json:"arrival_time"`
+	ExitTime    sql.NullTime         `json:"exit_time"`
 }
 
 type Society struct {
-	ID            int32        `json:"id"`
-	Name          string       `json:"name"`
-	Developer     string       `json:"developer"`
-	MaxResidences int32        `json:"max_residences"`
-	CityID        int32        `json:"city_id"`
-	IsValid       bool         `json:"is_valid"`
-	CreatedAt     sql.NullTime `json:"created_at"`
-	UpdatedAt     sql.NullTime `json:"updated_at"`
+	ID              int32        `json:"id"`
+	Name            string       `json:"name"`
+	Developer       string       `json:"developer"`
+	MaxResidences   int32        `json:"max_residences"`
+	CityID          int32        `json:"city_id"`
+	AccessRevokedAt sql.NullTime `json:"access_revoked_at"`
+	CreatedAt       sql.NullTime `json:"created_at"`
+	UpdatedAt       sql.NullTime `json:"updated_at"`
 }
 
-type Visit struct {
-	ID          int32        `json:"id"`
-	ResidenceID int32        `json:"residence_id"`
-	Status      VisitStatus  `json:"status"`
-	ArrivalTime sql.NullTime `json:"arrival_time"`
-	ExitTime    sql.NullTime `json:"exit_time"`
+type User struct {
+	ID              int32          `json:"id"`
+	Name            sql.NullString `json:"name"`
+	Email           sql.NullString `json:"email"`
+	Mobile          sql.NullString `json:"mobile"`
+	ResidenceID     sql.NullInt32  `json:"residence_id"`
+	SocietyID       sql.NullInt32  `json:"society_id"`
+	RoleLevel       int32          `json:"role_level"`
+	AccessRevokedAt sql.NullTime   `json:"access_revoked_at"`
+	CreatedAt       sql.NullTime   `json:"created_at"`
+	UpdatedAt       sql.NullTime   `json:"updated_at"`
+}
+
+type UserRole struct {
+	Level int32
+	Role  sql.NullString
 }
 
 type Visitor struct {
-	ID        uuid.UUID      `json:"id"`
+	ID        int32          `json:"id"`
 	Name      string         `json:"name"`
 	Mobile    string         `json:"mobile"`
 	Photo     sql.NullString `json:"photo"`

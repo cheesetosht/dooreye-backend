@@ -17,13 +17,13 @@ type ResidentCollector struct {
 }
 
 type VisitorCollector struct {
-	Name   string
-	Mobile string
-	Photo  string
+	Name   string `json:"name"`
+	Mobile string `json:"mobile"`
+	Photo  string `json:"photo"`
 }
 
-type VisitCollector struct {
-	ResidenceID int32       `json:"residence_id"`
-	VisitorID   string      `json:"visitor_id"`
-	Status      VisitStatus `json:"status"`
+type ResidenceVisitCollector struct {
+	ResidenceID int32                `json:"residence_id"`
+	VisitorID   string               `json:"visitor_id"`
+	Status      ResidenceVisitStatus `json:"status"`
 }

@@ -164,7 +164,7 @@ func GetSocieties(c fiber.Ctx) error {
 	query := `SELECT s.id, s.name, developer, max_residences, c.name city
 	FROM societies s
 		left join cities c on s.city_id = c.id
-	WHERE s.is_valid = true
+	WHERE s.access_revoked_at is null
 	  	and lower(s.name) LIKE $1
 	LIMIT $2 OFFSET $3;`
 	rows, err := db.PGPool.Query(context.Background(), query, fmt.Sprintf("%s%%", searchStr), limit, offset)

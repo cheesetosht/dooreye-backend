@@ -149,7 +149,7 @@ func InsertResident(resident models.ResidentCollector) (string, error) {
 	return id, nil
 }
 
-func InsertResidenceVisit(visit models.VisitCollector) (int, error) {
+func InsertResidenceVisit(visit models.ResidenceVisitCollector) (int, error) {
 	var id int
 	query := "INSERT INTO visits (residence_id, visitor_id, status) VALUES ($1, $2, $3) RETURNING id"
 	err := db.PGPool.QueryRow(context.Background(), query, visit.ResidenceID, visit.VisitorID, visit.Status).Scan(&id)
