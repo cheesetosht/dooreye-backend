@@ -69,19 +69,25 @@ CREATE TABLE residences
 -- END;
 -- $$ LANGUAGE plpgsql;
 
--- residents
-CREATE TABLE residents
+-- users
+CREATE TYPE user_access_level as ENUM ('application', 'society','residence');
+CREATE TABLE users
 (
     id                SERIAL PRIMARY KEY,
     name              VARCHAR,
     email             VARCHAR UNIQUE,
     mobile            VARCHAR(20) UNIQUE,
-    residence_id      INT     NOT NULL,
+    -- for residence access level
+    residence_id      INT,
     CONSTRAINT fk_residence FOREIGN KEY (residence_id) REFERENCES residences (id),
-    is_primary        BOOLEAN NOT NULL         DEFAULT false,
+    -- for society access level
+    society_id        INT,
+    CONSTRAINT fk_society FOREIGN KEY (society_id) REFERENCES societies (id),
+    is_admin          BOOLEAN           NOT NULL DEFAULT false,
+    access_level      user_access_level NOT NULL DEFAULT 'residence',
     access_revoked_at TIMESTAMP WITH TIME ZONE,
-    created_at        TIMESTAMP WITH TIME ZONE DEFAULT now(),
-    updated_at        TIMESTAMP WITH TIME ZONE DEFAULT now()
+    created_at        TIMESTAMP WITH TIME ZONE   DEFAULT now(),
+    updated_at        TIMESTAMP WITH TIME ZONE   DEFAULT now()
 );
 
 -- visitors
@@ -96,26 +102,15 @@ CREATE TABLE visitors
 );
 
 -- visits
-CREATE TYPE visit_status as ENUM ('accepted','rejected','pre-approved','security cleared');
+CREATE TYPE residence_visit_status as ENUM ('accepted','rejected','pre-approved','security cleared');
 CREATE TABLE residence_visits
 (
     id           SERIAL PRIMARY KEY,
-    residence_id INT          NOT NULL,
+    residence_id INT NOT NULL,
     CONSTRAINT fk_residence FOREIGN KEY (residence_id) REFERENCES residences (id),
-    visitor_id   INT          NOT NULL,
+    visitor_id   INT NOT NULL,
     CONSTRAINT fk_visitor FOREIGN KEY (visitor_id) REFERENCES visitors (id),
-    status       VISIT_STATUS NOT NULL,
+    status       residence_visit_status,
     arrival_time TIMESTAMP WITH TIME ZONE DEFAULT now(),
     exit_time    TIMESTAMP WITH TIME ZONE
-);
-
--- agents
-CREATE TYPE agent_role as ENUM ('admin','manager','security');
-CREATE TABLE agents
-(
-    id         SERIAL PRIMARY KEY,
-    name       VARCHAR            NOT NULL,
-    mobile     VARCHAR(20) UNIQUE NOT NULL,
-    society_id INT                NOT NULL,
-    CONSTRAINT fk_society FOREIGN KEY (society_id) REFERENCES societies (id)
 );
