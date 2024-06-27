@@ -69,8 +69,20 @@ CREATE TABLE residences
 -- END;
 -- $$ LANGUAGE plpgsql;
 
+-- users roles
+CREATE TABLE user_roles
+(
+    level SERIAL PRIMARY KEY,
+    role  VARCHAR(32)
+);
+INSERT INTO user_roles (level, role)
+VALUES (1, 'resident'),
+       (2, 'security'),
+       (3, 'operator'),
+       (4, 'manager'),
+       (5, 'admin');
+
 -- users
-CREATE TYPE user_access_level as ENUM ('application', 'society','residence');
 CREATE TABLE users
 (
     id                SERIAL PRIMARY KEY,
@@ -83,11 +95,11 @@ CREATE TABLE users
     -- for society access level
     society_id        INT,
     CONSTRAINT fk_society FOREIGN KEY (society_id) REFERENCES societies (id),
-    is_admin          BOOLEAN           NOT NULL DEFAULT false,
-    access_level      user_access_level NOT NULL DEFAULT 'residence',
+    role_level        INT NOT NULL             DEFAULT 1,
+    CONSTRAINT fk_user_role FOREIGN KEY (role_level) REFERENCES user_roles (level),
     access_revoked_at TIMESTAMP WITH TIME ZONE,
-    created_at        TIMESTAMP WITH TIME ZONE   DEFAULT now(),
-    updated_at        TIMESTAMP WITH TIME ZONE   DEFAULT now()
+    created_at        TIMESTAMP WITH TIME ZONE DEFAULT now(),
+    updated_at        TIMESTAMP WITH TIME ZONE DEFAULT now()
 );
 
 -- visitors
