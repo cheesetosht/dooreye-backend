@@ -9,6 +9,43 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
+func CheckAuthByID(id int, role_level int) (bool, error) {
+	var exists bool
+
+	if role_level == 1 {
+		query := `SELECT EXISTS(
+		SELECT 1
+		    FROM users u
+		            INNER JOIN residences rc ON rc.id = u.residence_id
+		            INNER JOIN societies sc ON sc.id = rc.society_id
+		    WHERE u.role_level = 1
+		    AND sc.access_revoked_at IS NULL
+		    AND u.access_revoked_at IS NULL
+		    AND u.id = :rId);`
+		err := db.PGPool.QueryRow(context.Background(), query, id).Scan(&exists)
+		if err != nil {
+			return false, err
+		}
+		return exists, nil
+	} else if role_level < 5 {
+		query := `SELECT EXISTS(SELECT 1
+		    FROM users u
+		            INNER JOIN societies sc ON sc.id = u.society_id
+		    WHERE u.role_level > 1
+		    AND u.role_level < 5
+		    AND sc.access_revoked_at IS NULL
+		    AND u.access_revoked_at IS NULL
+		    AND u.id = :rId);`
+		err := db.PGPool.QueryRow(context.Background(), query, id).Scan(&exists)
+		if err != nil {
+			return false, err
+		}
+		return exists, nil
+	}
+	return false, nil
+
+}
+
 func BulkInsertBlocks(data models.BlocksCollector) error {
 	context := context.Background()
 	conn, err := db.PGPool.Acquire(context)
@@ -95,7 +132,7 @@ func InsertVisitor(visitor models.VisitorCollector) (int, error) {
 func GetVisitorIDByMobile(mobile string) (int, error) {
 	var visitorID int
 	query := "SELECT id FROM visitors v WHERE v.mobile = $1"
-	err := db.PGPool.QueryRow(context.Background(), query).Scan(&visitorID)
+	err := db.PGPool.QueryRow(context.Background(), query, mobile).Scan(&visitorID)
 	if err != nil {
 		return 0, err
 	}
