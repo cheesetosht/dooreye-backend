@@ -12,15 +12,15 @@ CREATE TABLE cities
 -- societies
 CREATE TABLE societies
 (
-    id             SERIAL PRIMARY KEY,
-    name           VARCHAR UNIQUE NOT NULL,
-    developer      VARCHAR        NOT NULL,
-    max_residences INT            NOT NULL,
-    city_id        INT            NOT NULL,
+    id                SERIAL PRIMARY KEY,
+    name              VARCHAR UNIQUE NOT NULL,
+    developer         VARCHAR        NOT NULL,
+    max_residences    INT            NOT NULL,
+    city_id           INT            NOT NULL,
     CONSTRAINT fk_city FOREIGN KEY (city_id) REFERENCES cities (id),
-    is_valid       BOOLEAN        NOT NULL  DEFAULT true,
-    created_at     TIMESTAMP WITH TIME ZONE DEFAULT now(),
-    updated_at     TIMESTAMP WITH TIME ZONE DEFAULT now()
+    access_revoked_at TIMESTAMP WITH TIME ZONE,
+    created_at        TIMESTAMP WITH TIME ZONE DEFAULT now(),
+    updated_at        TIMESTAMP WITH TIME ZONE DEFAULT now()
 );
 
 -- blocks
@@ -72,16 +72,16 @@ CREATE TABLE residences
 -- residents
 CREATE TABLE residents
 (
-    id           SERIAL PRIMARY KEY,
-    name         VARCHAR,
-    email        VARCHAR UNIQUE,
-    mobile       VARCHAR(20) UNIQUE,
-    residence_id INT     NOT NULL,
+    id                SERIAL PRIMARY KEY,
+    name              VARCHAR,
+    email             VARCHAR UNIQUE,
+    mobile            VARCHAR(20) UNIQUE,
+    residence_id      INT     NOT NULL,
     CONSTRAINT fk_residence FOREIGN KEY (residence_id) REFERENCES residences (id),
-    is_primary   BOOLEAN NOT NULL         DEFAULT false,
-    is_valid     BOOLEAN NOT NULL         DEFAULT true,
-    created_at   TIMESTAMP WITH TIME ZONE DEFAULT now(),
-    updated_at   TIMESTAMP WITH TIME ZONE DEFAULT now()
+    is_primary        BOOLEAN NOT NULL         DEFAULT false,
+    access_revoked_at TIMESTAMP WITH TIME ZONE,
+    created_at        TIMESTAMP WITH TIME ZONE DEFAULT now(),
+    updated_at        TIMESTAMP WITH TIME ZONE DEFAULT now()
 );
 
 -- visitors
