@@ -97,7 +97,7 @@ type User struct {
 	ID              int32          `json:"id"`
 	Name            sql.NullString `json:"name"`
 	Email           sql.NullString `json:"email"`
-	Mobile          sql.NullString `json:"mobile"`
+	PhoneNumber     sql.NullString `json:"phone_number"`
 	ResidenceID     sql.NullInt32  `json:"residence_id"`
 	SocietyID       sql.NullInt32  `json:"society_id"`
 	RoleLevel       int32          `json:"role_level"`
@@ -112,10 +112,10 @@ type UserRole struct {
 }
 
 type Visitor struct {
-	ID        int32          `json:"id"`
-	Name      string         `json:"name"`
-	Mobile    string         `json:"mobile"`
-	Photo     sql.NullString `json:"photo"`
-	CreatedAt sql.NullTime   `json:"created_at"`
-	UpdatedAt sql.NullTime   `json:"updated_at"`
+	ID          int32          `json:"id"`
+	Name        string         `json:"name"`
+	PhoneNumber sql.NullString `json:"phone_number"`
+	Photo       sql.NullString `json:"photo"`
+	CreatedAt   sql.NullTime   `json:"created_at"`
+	UpdatedAt   sql.NullTime   `json:"updated_at"`
 }

@@ -13,7 +13,7 @@ import (
 
 const (
 	otpDigits    = 4
-	otpPeriod    = 300 // 5 minutes
+	otpPeriod    = 600 // 10 minutes
 	otpAlgorithm = "SHA1"
 )
 

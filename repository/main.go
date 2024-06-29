@@ -59,6 +59,34 @@ func MarkAuthSecretAsUsed(id int) error {
 	return nil
 }
 
+func GetUserByPhoneNumberOrEmail(phoneNumber, email *string) (models.User, error) {
+	var (
+		identifierKey, identifier string
+		user                      models.User
+	)
+	if phoneNumber != nil {
+		identifierKey = "phone_number"
+		identifier = *phoneNumber
+	} else if email != nil {
+		identifierKey = "email"
+		identifier = *email
+	}
+	query := "SELECT * FROM users WHERE " + identifierKey + " = $1 AND access_revoked_at IS NULL;"
+	err := db.PGPool.QueryRow(context.Background(), query, identifier).Scan(
+		&user.ID,
+		&user.Name,
+		&user.Email,
+		&user.PhoneNumber,
+		&user.ResidenceID,
+		&user.SocietyID,
+		&user.RoleLevel,
+		&user.AccessRevokedAt,
+		&user.CreatedAt,
+		&user.UpdatedAt,
+	)
+	return user, err
+}
+
 func CheckAuthByID(id int, roleLevel int) (bool, error) {
 	var exists bool
 
@@ -93,7 +121,6 @@ func CheckAuthByID(id int, roleLevel int) (bool, error) {
 		return exists, nil
 	}
 	return false, nil
-
 }
 
 func BulkInsertBlocks(data models.BlocksCollector) error {

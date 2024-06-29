@@ -15,7 +15,7 @@ import (
 )
 
 func RequestOTP(c fiber.Ctx) error {
-	var body models.AuthSecretCollector
+	var body models.AuthCollector
 	if err := c.Bind().Body(&body); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": "invalid input",
@@ -93,9 +93,20 @@ func VerifyOTP(c fiber.Ctx) error {
 	}
 
 	go repository.MarkAuthSecretAsUsed(authSecretId)
+
+	user, err := repository.GetUserByPhoneNumberOrEmail(body.PhoneNumber, body.Email)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "user not found",
+		})
+	}
+
+	token, err := utility.CreateJWTToken(utility.JWTAuthClaims{UserID: user.ID, RoleLevel: user.RoleLevel})
+
 	return c.JSON(&fiber.Map{
 		"data": &fiber.Map{
 			"isValid": isValid,
+			"token":   token,
 		},
 		"error":   nil,
 		"success": true,
@@ -173,7 +184,6 @@ func GetCities(c fiber.Ctx) error {
 			"error": "internal server error",
 		})
 	}
-
 	return c.JSON(&fiber.Map{
 		"data":    cities,
 		"error":   nil,

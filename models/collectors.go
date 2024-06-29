@@ -1,6 +1,6 @@
 package models
 
-type AuthSecretCollector struct {
+type AuthCollector struct {
 	PhoneNumber *string `json:"phone_number"`
 	Email       *string `json:"email"`
 }
