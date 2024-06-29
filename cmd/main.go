@@ -34,6 +34,8 @@ func main() {
 	app.Get("/ping", func(c fiber.Ctx) error {
 		return c.SendString("pong")
 	})
+	app.Post("/auth/request-otp", handler.RequestOTP)
+	app.Post("/auth/verify-otp", handler.VerifyOTP)
 	app.Get("/cities", handler.GetCities)
 	// app.Post("/cities", handler.InsertCity)
 	app.Post("/societies", handler.InsertSociety)

@@ -8,10 +8,99 @@ import (
 	"hime-backend/repository"
 	"hime-backend/utility"
 	"strconv"
+	"time"
 
 	"github.com/gofiber/fiber/v3"
 	"github.com/jackc/pgx/v5"
 )
+
+func RequestOTP(c fiber.Ctx) error {
+	var body models.AuthSecretCollector
+	if err := c.Bind().Body(&body); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "invalid input",
+		})
+	}
+
+	if body.PhoneNumber == nil && body.Email == nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "either email or phone number is required",
+		})
+	}
+
+	otp, secret, err := utility.GenerateVerificationCode()
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "unable to generate OTP",
+		})
+	}
+
+	expiresAt := time.Now().Add(5 * time.Minute)
+	if err := repository.StoreAuthSecret(body.PhoneNumber, body.Email, secret, expiresAt); err != nil {
+		fmt.Println("err", err)
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "something went wrong, please try again",
+		})
+	}
+
+	return c.JSON(&fiber.Map{
+		"data":    otp,
+		"error":   nil,
+		"success": true,
+	})
+}
+
+func VerifyOTP(c fiber.Ctx) error {
+	var body struct {
+		OTP         string  `json:"otp"`
+		PhoneNumber *string `json:"phone_number"`
+		Email       *string `json:"email"`
+	}
+	if err := c.Bind().Body(&body); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "invalid input",
+		})
+	}
+	if body.OTP == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "OTP not provided",
+		})
+	}
+
+	if body.PhoneNumber == nil && body.Email == nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "either email or phone number is required",
+		})
+	}
+
+	secret, authSecretId, err := repository.GetAuthSecret(body.PhoneNumber, body.Email)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "OTP expired",
+		})
+	}
+
+	isValid, err := utility.VerifyOTP(body.OTP, secret)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "unable to verify OTP",
+		})
+	}
+	if !isValid {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "invalid OTP",
+		})
+	}
+
+	go repository.MarkAuthSecretAsUsed(authSecretId)
+	return c.JSON(&fiber.Map{
+		"data": &fiber.Map{
+			"isValid": isValid,
+		},
+		"error":   nil,
+		"success": true,
+	})
+}
 
 func InsertCity(c fiber.Ctx) error {
 	var city models.City

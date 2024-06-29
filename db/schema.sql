@@ -88,7 +88,7 @@ CREATE TABLE users
     id                SERIAL PRIMARY KEY,
     name              VARCHAR,
     email             VARCHAR UNIQUE,
-    mobile            VARCHAR(20) UNIQUE,
+    phone_number      VARCHAR(20) UNIQUE,
     -- for residence access level
     residence_id      INT,
     CONSTRAINT fk_residence FOREIGN KEY (residence_id) REFERENCES residences (id),
@@ -105,12 +105,12 @@ CREATE TABLE users
 -- visitors
 CREATE TABLE visitors
 (
-    id         SERIAL PRIMARY KEY,
-    name       VARCHAR            NOT NULL,
-    mobile     VARCHAR(20) UNIQUE NOT NULL,
-    photo      TEXT,
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT now(),
-    updated_at TIMESTAMP WITH TIME ZONE DEFAULT now()
+    id           SERIAL PRIMARY KEY,
+    name         VARCHAR            NOT NULL,
+    phone_number VARCHAR(20) UNIQUE NOT NULL,
+    photo        TEXT,
+    created_at   TIMESTAMP WITH TIME ZONE DEFAULT now(),
+    updated_at   TIMESTAMP WITH TIME ZONE DEFAULT now()
 );
 
 -- visits
@@ -126,3 +126,18 @@ CREATE TABLE residence_visits
     arrival_time TIMESTAMP WITH TIME ZONE DEFAULT now(),
     exit_time    TIMESTAMP WITH TIME ZONE
 );
+
+-- auth secrets
+CREATE TABLE auth_secrets
+(
+    id           SERIAL PRIMARY KEY,
+    email        VARCHAR,
+    phone_number VARCHAR(20),
+    secret       VARCHAR(32)              NOT NULL,
+    is_used      BOOLEAN                  DEFAULT FALSE,
+    expires_at   TIMESTAMP WITH TIME ZONE NOT NULL,
+    created_at   TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_phone_number ON auth_secrets (phone_number);
+CREATE INDEX idx_expires_at ON auth_secrets (expires_at);

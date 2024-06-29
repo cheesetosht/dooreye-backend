@@ -1,5 +1,10 @@
 package models
 
+type AuthSecretCollector struct {
+	PhoneNumber *string `json:"phone_number"`
+	Email       *string `json:"email"`
+}
+
 type BlocksCollector struct {
 	BlockNames []string `json:"block_names"`
 	SocietyID  int32    `json:"society_id"`

@@ -5,14 +5,64 @@ import (
 	"fmt"
 	"hime-backend/db"
 	"hime-backend/models"
+	"log"
+	"time"
 
 	"github.com/jackc/pgx/v5"
 )
 
-func CheckAuthByID(id int, role_level int) (bool, error) {
+func StoreAuthSecret(phoneNumber, email *string, secret string, expiresAt time.Time) error {
+	var (
+		id         int
+		identifier string
+		query      string
+	)
+
+	if phoneNumber != nil {
+		identifier = *phoneNumber
+		query = `INSERT INTO auth_secrets (phone_number, secret, expires_at) VALUES ($1, $2, $3) returning id;`
+	} else if email != nil {
+		identifier = *email
+		query = `INSERT INTO auth_secrets (email, secret, expires_at) VALUES ($1, $2, $3) returning id;`
+	}
+	err := db.PGPool.QueryRow(context.Background(), query, identifier, secret, expiresAt).Scan(&id)
+	if err != nil {
+		return fmt.Errorf("!! failed to store auth secret: %s", err)
+	}
+	return nil
+}
+func GetAuthSecret(phoneNumber, email *string) (string, int, error) {
+	var (
+		id            int
+		secret        string
+		identifierKey string
+		identifier    string
+	)
+	if phoneNumber != nil {
+		identifierKey = "phone_number"
+		identifier = *phoneNumber
+	} else if email != nil {
+		identifierKey = "email"
+		identifier = *email
+	}
+	query := "SELECT secret, id FROM auth_secrets WHERE " + identifierKey + " = $1 AND is_used = FALSE AND expires_at > NOW() ORDER BY id DESC LIMIT 1;"
+	err := db.PGPool.QueryRow(context.Background(), query, identifier).Scan(&secret, &id)
+	if err != nil {
+		return "", 0, fmt.Errorf("!! failed to fetch auth secret: %s", err)
+	}
+	return secret, id, nil
+}
+func MarkAuthSecretAsUsed(id int) error {
+	query := `UPDATE auth_secrets SET is_used = TRUE WHERE id = $1 AND expires_at > NOW() AND is_used = FALSE RETURNING id;`
+	db.PGPool.QueryRow(context.Background(), query, id)
+	log.Println("> delete from auth_secrets, id: ", id)
+	return nil
+}
+
+func CheckAuthByID(id int, roleLevel int) (bool, error) {
 	var exists bool
 
-	if role_level == 1 {
+	if roleLevel == 1 {
 		query := `SELECT EXISTS(
 		SELECT 1
 		    FROM users u
@@ -27,7 +77,7 @@ func CheckAuthByID(id int, role_level int) (bool, error) {
 			return false, err
 		}
 		return exists, nil
-	} else if role_level < 5 {
+	} else if roleLevel < 5 {
 		query := `SELECT EXISTS(SELECT 1
 		    FROM users u
 		            INNER JOIN societies sc ON sc.id = u.society_id
