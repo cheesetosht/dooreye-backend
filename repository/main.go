@@ -99,13 +99,13 @@ func CheckAuthByID(id int, roleLevel int) (bool, error) {
 		    WHERE u.role_level = 1
 		    AND sc.access_revoked_at IS NULL
 		    AND u.access_revoked_at IS NULL
-		    AND u.id = :rId);`
+		    AND u.id = $1);`
 		err := db.PGPool.QueryRow(context.Background(), query, id).Scan(&exists)
 		if err != nil {
 			return false, err
 		}
 		return exists, nil
-	} else if roleLevel < 5 {
+	} else if roleLevel > 1 && roleLevel < 5 {
 		query := `SELECT EXISTS(SELECT 1
 		    FROM users u
 		            INNER JOIN societies sc ON sc.id = u.society_id
@@ -113,7 +113,7 @@ func CheckAuthByID(id int, roleLevel int) (bool, error) {
 		    AND u.role_level < 5
 		    AND sc.access_revoked_at IS NULL
 		    AND u.access_revoked_at IS NULL
-		    AND u.id = :rId);`
+		    AND u.id = $1);`
 		err := db.PGPool.QueryRow(context.Background(), query, id).Scan(&exists)
 		if err != nil {
 			return false, err

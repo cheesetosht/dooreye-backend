@@ -3,13 +3,16 @@ package main
 import (
 	"hime-backend/db"
 	"hime-backend/handler"
+	"hime-backend/middleware"
 	"hime-backend/utility"
 	"log"
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	"github.com/gofiber/fiber/v3"
+	"github.com/gofiber/fiber/v3/middleware/limiter"
 	"github.com/gofiber/fiber/v3/middleware/logger"
 	"github.com/joho/godotenv"
 )
@@ -31,18 +34,30 @@ func main() {
 	// router
 	app := fiber.New()
 	app.Use(logger.New())
+	app.Use(limiter.New(limiter.Config{
+		Max:        48,
+		Expiration: 1 * time.Minute,
+		KeyGenerator: func(c fiber.Ctx) string {
+			return c.IP()
+		},
+		LimitReached: func(c fiber.Ctx) error {
+			return c.Status(fiber.StatusTooManyRequests).JSON(fiber.Map{
+				"error": "rate limit exceeded, please try again later.",
+			})
+		},
+	}))
 	app.Get("/ping", func(c fiber.Ctx) error {
 		return c.SendString("pong")
 	})
 	app.Post("/auth/request-otp", handler.RequestOTP)
 	app.Post("/auth/verify-otp", handler.VerifyOTP)
-	app.Get("/cities", handler.GetCities)
 	// app.Post("/cities", handler.InsertCity)
-	app.Post("/societies", handler.InsertSociety)
-	app.Get("/societies", handler.GetSocieties)
-	app.Post("/blocks/bulk", handler.BulkInsertBlocks)
-	app.Post("/residences/bulk", handler.BulkInsertResidences)
-	app.Post("/residents", handler.InsertResident)
+	app.Get("/cities", handler.GetCities, middleware.AuthByRoleLevel(4))
+	app.Post("/societies", handler.InsertSociety, middleware.AuthByRoleLevel(4))
+
+	app.Get("/societies", handler.GetSocieties, middleware.AuthByRoleLevel(5))
+	app.Post("/blocks/bulk", handler.BulkInsertBlocks, middleware.AuthByRoleLevel(5))
+	app.Post("/residences/bulk", handler.BulkInsertResidences, middleware.AuthByRoleLevel(5))
 
 	go func() {
 		if err := app.Listen(":" + os.Getenv("PORT")); err != nil {

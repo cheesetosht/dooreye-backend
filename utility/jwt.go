@@ -24,7 +24,7 @@ func CreateJWTToken(jwtAuthClaims JWTAuthClaims) (string, error) {
 	return tokenString, nil
 }
 
-func ParseToken(tokenString string) (*JWTAuthClaims, error) {
+func ParseJWTToken(tokenString string) (*JWTAuthClaims, error) {
 	jwtAuthClaims := &JWTAuthClaims{}
 	token, err := jwt.ParseWithClaims(tokenString, jwtAuthClaims, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
