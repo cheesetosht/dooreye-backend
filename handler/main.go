@@ -14,6 +14,27 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
+func BulkInsertResidentUser(c fiber.Ctx) error {
+	var body []models.ResidentUserCollector
+
+	if err := c.Bind().Body(&body); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "invalid input",
+		})
+	}
+
+	err := repository.BulkInsertResidentUsers(body)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "internal server error",
+		})
+	}
+
+	return c.Status(fiber.StatusCreated).JSON(fiber.Map{
+		"success": true,
+	})
+}
+
 func RequestOTP(c fiber.Ctx) error {
 	var body models.AuthCollector
 	if err := c.Bind().Body(&body); err != nil {

@@ -1,5 +1,12 @@
 package models
 
+type ResidentUserCollector struct {
+	ResidenceID int32   `json:"residence_id"`
+	Name        string  `json:"name"`
+	PhoneNumber *string `json:"phone_number"`
+	Email       *string `json:"email"`
+}
+
 type AuthCollector struct {
 	PhoneNumber *string `json:"phone_number"`
 	Email       *string `json:"email"`

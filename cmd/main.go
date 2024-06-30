@@ -51,13 +51,14 @@ func main() {
 	})
 	app.Post("/auth/request-otp", handler.RequestOTP)
 	app.Post("/auth/verify-otp", handler.VerifyOTP)
-	// app.Post("/cities", handler.InsertCity)
-	app.Get("/cities", handler.GetCities, middleware.AuthByRoleLevel(4))
 	app.Post("/societies", handler.InsertSociety, middleware.AuthByRoleLevel(4))
 
+	// app.Post("/cities", handler.InsertCity)
+	app.Get("/cities", handler.GetCities, middleware.AuthByRoleLevel(5))
 	app.Get("/societies", handler.GetSocieties, middleware.AuthByRoleLevel(5))
 	app.Post("/blocks/bulk", handler.BulkInsertBlocks, middleware.AuthByRoleLevel(5))
 	app.Post("/residences/bulk", handler.BulkInsertResidences, middleware.AuthByRoleLevel(5))
+	app.Post("/users/resident-bulk", handler.BulkInsertResidentUser, middleware.AuthByRoleLevel(4))
 
 	go func() {
 		if err := app.Listen(":" + os.Getenv("PORT")); err != nil {
