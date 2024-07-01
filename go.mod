@@ -3,7 +3,7 @@ module hime-backend
 go 1.22.0
 
 require (
-	github.com/aws/aws-sdk-go v1.54.2
+	github.com/aws/aws-sdk-go v1.54.11
 	github.com/gofiber/fiber/v3 v3.0.0-beta.2
 	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/jackc/pgx/v5 v5.6.0

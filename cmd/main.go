@@ -22,7 +22,7 @@ func init() {
 	if err != nil {
 		log.Fatalf("!! error loading .env file")
 	}
-	envVars := []string{"PORT", "DATABASE_URL", "JWT_SECRET"}
+	envVars := []string{"PORT", "DATABASE_URL", "JWT_SECRET", "AWS_REGION", "AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY", "AWS_S3_BUCKET_NAME"}
 	utility.ValidateEnv(envVars)
 	log.Println("> start program")
 }
@@ -52,6 +52,8 @@ func main() {
 	app.Post("/auth/request-otp", handler.RequestOTP)
 	app.Post("/auth/verify-otp", handler.VerifyOTP)
 	app.Post("/societies", handler.InsertSociety, middleware.AuthByRoleLevel(4))
+
+	app.Post("/visitors", handler.CreateVisitor, middleware.AuthByRoleLevel(2))
 
 	// app.Post("/cities", handler.InsertCity)
 	app.Get("/cities", handler.GetCities, middleware.AuthByRoleLevel(5))

@@ -112,7 +112,7 @@ func CheckAuthByID(id int, roleLevel int) (bool, error) {
 		    FROM users u
 		            INNER JOIN societies sc ON sc.id = u.society_id
 		    WHERE u.role_level > 1
-		    AND u.role_level < 5
+		    AND u.role_level <= 5
 		    AND sc.access_revoked_at IS NULL
 		    AND u.access_revoked_at IS NULL
 		    AND u.id = $1);`

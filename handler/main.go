@@ -7,7 +7,10 @@ import (
 	"hime-backend/models"
 	"hime-backend/repository"
 	"hime-backend/utility"
+	"os"
+	"path/filepath"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gofiber/fiber/v3"
@@ -58,7 +61,13 @@ func RequestOTP(c fiber.Ctx) error {
 
 	expiresAt := time.Now().Add(5 * time.Minute)
 	if err := repository.StoreAuthSecret(body.PhoneNumber, body.Email, secret, expiresAt); err != nil {
-		fmt.Println("err", err)
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "something went wrong, please try again",
+		})
+	}
+
+	if err := utility.SendSMS(*body.PhoneNumber, "Your secure code access your HIME account is "+otp); err != nil {
+		fmt.Println(err)
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": "something went wrong, please try again",
 		})
@@ -394,38 +403,39 @@ func InsertResident(c fiber.Ctx) error {
 	})
 }
 
-func CreateVisit(c fiber.Ctx) error {
-	form, err := c.MultipartForm()
+func CreateVisitor(c fiber.Ctx) error {
+	name := c.FormValue("name")
+	phoneNumber := c.FormValue("phone_number")
+	file, err := c.FormFile("visitor_photo")
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": "!! failed to parse formdata",
+			"error": "unable to retrieve file",
 		})
 	}
 
-	files := form.File["visitor_photo"]
-
-	if len(files) == 0 {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": "!! no file uploaded",
-		})
+	var filename string
+	if name == "" {
+		filename = phoneNumber
+	} else {
+		filename = name
 	}
+	filename += filepath.Ext(file.Filename)
+	filename = strings.ReplaceAll(filename, " ", "_")
 
-	visitorPhoto := files[0]
-	file, err := visitorPhoto.Open()
+	s3Path := fmt.Sprintf("visitors/%s", filename)
+
+	s3URL, err := utility.UploadFileToS3(file, s3Path, os.Getenv("AWS_S3_BUCKET_NAME"))
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": "!! failed to read file",
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": fmt.Sprintf("unable to upload image: %v", err),
 		})
 	}
 
-	utility.UploadFileToS3(file, visitorPhoto, "visitor_photos")
-	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": "!! failed to read file",
-		})
-	}
-
-	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+	return c.JSON(fiber.Map{
+		"data": &fiber.Map{
+			"url": s3URL,
+		},
 		"success": true,
 	})
+
 }
