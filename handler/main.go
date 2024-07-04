@@ -17,7 +17,7 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func BulkInsertResidentUser(c fiber.Ctx) error {
+func BulkCreateResidentUser(c fiber.Ctx) error {
 	var body []models.ResidentUserCollector
 
 	if err := c.Bind().Body(&body); err != nil {
@@ -143,7 +143,7 @@ func VerifyOTP(c fiber.Ctx) error {
 	})
 }
 
-func InsertCity(c fiber.Ctx) error {
+func CreateCity(c fiber.Ctx) error {
 	var city models.City
 
 	if err := c.Bind().Body(&city); err != nil {
@@ -178,7 +178,7 @@ type cityPresenter struct {
 	State string `json:"state"`
 }
 
-func GetCities(c fiber.Ctx) error {
+func FetchCities(c fiber.Ctx) error {
 	searchStr := c.Query("search")
 
 	if searchStr == "" {
@@ -228,7 +228,7 @@ type societyCollector struct {
 	CityID        int32  `json:"city_id"`
 }
 
-func InsertSociety(c fiber.Ctx) error {
+func CreateSociety(c fiber.Ctx) error {
 	var society societyCollector
 
 	if err := c.Bind().Body(&society); err != nil {
@@ -268,7 +268,7 @@ type societyPresenter struct {
 	City          string `json:"city"`
 }
 
-func GetSocieties(c fiber.Ctx) error {
+func FetchSocieties(c fiber.Ctx) error {
 	searchStr := c.Query("search")
 
 	if searchStr == "" {
@@ -318,7 +318,7 @@ func GetSocieties(c fiber.Ctx) error {
 	})
 }
 
-func BulkInsertBlocks(c fiber.Ctx) error {
+func BulkCreateBlocks(c fiber.Ctx) error {
 	var body models.BlocksCollector
 
 	if err := c.Bind().Body(&body); err != nil {
@@ -345,7 +345,7 @@ func BulkInsertBlocks(c fiber.Ctx) error {
 	})
 }
 
-func BulkInsertResidences(c fiber.Ctx) error {
+func BulkCreateResidences(c fiber.Ctx) error {
 	var body models.ResidencesCollector
 
 	if err := c.Bind().Body(&body); err != nil {
@@ -369,37 +369,6 @@ func BulkInsertResidences(c fiber.Ctx) error {
 
 	return c.Status(fiber.StatusCreated).JSON(fiber.Map{
 		"success": true,
-	})
-}
-
-func InsertResident(c fiber.Ctx) error {
-	var resident models.ResidentCollector
-
-	if err := c.Bind().Body(&resident); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": "invalid input",
-		})
-	}
-
-	if resident.ResidenceID == 0 {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": "all fields are required",
-		})
-	}
-
-	id, err := repository.InsertResident(resident)
-	if err != nil {
-		fmt.Println(err)
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": "internal server error",
-		})
-	}
-
-	return c.Status(fiber.StatusCreated).JSON(fiber.Map{
-		"success": true,
-		"data": fiber.Map{
-			"id": id,
-		},
 	})
 }
 
