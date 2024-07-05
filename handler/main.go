@@ -422,6 +422,30 @@ func CreateVisitorFromGate(c fiber.Ctx) error {
 	})
 
 }
+func CreateVisitorFromResidence(c fiber.Ctx) error {
+	name := c.FormValue("name")
+	phoneNumber := c.FormValue("phone_number")
+	purpose := c.FormValue("purpose")
+
+	visitor, err := repository.InsertVisitor(models.VisitorCollector{
+		Name:        name,
+		PhoneNumber: phoneNumber,
+		Purpose:     purpose,
+	}, true)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": fmt.Sprintf("something went wrong: %v", err),
+		})
+	}
+
+	return c.JSON(fiber.Map{
+		"data": &fiber.Map{
+			"visitor": visitor,
+		},
+		"success": true,
+	})
+
+}
 
 func GetVisitor(c fiber.Ctx) error {
 	phoneNumber := c.Query("phone_number")
