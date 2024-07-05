@@ -116,6 +116,8 @@ type Visitor struct {
 	Name          string     `json:"name"`
 	PhoneNumber   string     `json:"phone_number"`
 	Photo         *string    `json:"photo"`
+	Purpose       string     `json:"purpose"`
+	IsPreapproved bool       `json:"is_preapproved"`
 	CreatedAt     *time.Time `json:"created_at"`
 	UpdatedAt     *time.Time `json:"updated_at"`
 }

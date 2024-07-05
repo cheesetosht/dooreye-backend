@@ -53,6 +53,7 @@ func main() {
 	app.Post("/auth/verify-otp", handler.VerifyOTP)
 	app.Post("/societies", handler.CreateSociety, middleware.AuthByRoleLevel(4))
 
+	app.Get("/visitors", handler.GetVisitor, middleware.AuthByRoleLevel(2))
 	app.Post("/visitors", handler.CreateVisitor, middleware.AuthByRoleLevel(2))
 
 	// app.Post("/cities", handler.InsertCity)

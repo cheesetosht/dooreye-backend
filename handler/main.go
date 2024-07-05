@@ -408,3 +408,26 @@ func CreateVisitor(c fiber.Ctx) error {
 	})
 
 }
+
+func GetVisitor(c fiber.Ctx) error {
+	phoneNumber := c.Query("phone_number")
+
+	if phoneNumber == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "atleast 4 digits of phone number is required",
+		})
+	}
+
+	visitor, err := repository.GetVisitorByMobile(phoneNumber)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "no visitor found with this phone number",
+		})
+	}
+
+	return c.JSON(&fiber.Map{
+		"data":    visitor,
+		"error":   nil,
+		"success": true,
+	})
+}

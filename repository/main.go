@@ -92,14 +92,22 @@ func InsertVisitor(visitor models.VisitorCollector) (int, error) {
 	return id, nil
 }
 
-func GetVisitorIDByMobile(mobile string) (int, error) {
-	var visitorID int
-	query := "SELECT id FROM visitors v WHERE v.mobile = $1"
-	err := db.PGPool.QueryRow(context.Background(), query, mobile).Scan(&visitorID)
-	if err != nil {
-		return 0, err
-	}
-	return visitorID, nil
+func GetVisitorByMobile(phoneNumber string) (models.Visitor, error) {
+	var visitor models.Visitor
+	query := `SELECT id, name, phone_number, photo, purpose, is_preapproved, created_at, updated_at
+	FROM visitors v WHERE v.phone_number = $1`
+	err := db.PGPool.QueryRow(context.Background(), query, phoneNumber).Scan(
+		&visitor.ID,
+		&visitor.Name,
+		&visitor.PhoneNumber,
+		&visitor.Photo,
+		&visitor.Purpose,
+		&visitor.IsPreapproved,
+		&visitor.CreatedAt,
+		&visitor.UpdatedAt,
+	)
+
+	return visitor, err
 }
 
 func InsertResidenceVisit(visit models.ResidenceVisitCollector) (int, error) {

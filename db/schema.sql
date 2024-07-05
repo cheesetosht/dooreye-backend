@@ -105,12 +105,14 @@ CREATE TABLE users
 -- visitors
 CREATE TABLE visitors
 (
-    id           SERIAL PRIMARY KEY,
-    name         VARCHAR            NOT NULL,
-    phone_number VARCHAR(20) UNIQUE NOT NULL,
-    photo        TEXT,
-    created_at   TIMESTAMP WITH TIME ZONE DEFAULT now(),
-    updated_at   TIMESTAMP WITH TIME ZONE DEFAULT now()
+    id             SERIAL PRIMARY KEY,
+    name           VARCHAR            NOT NULL,
+    phone_number   VARCHAR(20) UNIQUE NOT NULL,
+    photo          TEXT,
+    purpose        VARCHAR            NOT NULL,
+    is_preapproved BOOLEAN            NOT NULL DEFAULT FALSE,
+    created_at     TIMESTAMP WITH TIME ZONE    DEFAULT now(),
+    updated_at     TIMESTAMP WITH TIME ZONE    DEFAULT now()
 );
 
 -- visits
@@ -140,4 +142,5 @@ CREATE TABLE auth_secrets
 );
 
 CREATE INDEX idx_phone_number ON auth_secrets (phone_number);
+CREATE INDEX idx_email ON auth_secrets (email);
 CREATE INDEX idx_expires_at ON auth_secrets (expires_at);
