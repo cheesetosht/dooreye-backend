@@ -372,10 +372,12 @@ func BulkCreateResidences(c fiber.Ctx) error {
 	})
 }
 
-func CreateVisitor(c fiber.Ctx) error {
+func CreateVisitorFromGate(c fiber.Ctx) error {
 	name := c.FormValue("name")
 	phoneNumber := c.FormValue("phone_number")
+	purpose := c.FormValue("purpose")
 	file, err := c.FormFile("visitor_photo")
+
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": "unable to retrieve file",
@@ -400,9 +402,21 @@ func CreateVisitor(c fiber.Ctx) error {
 		})
 	}
 
+	visitor, err := repository.InsertVisitor(models.VisitorCollector{
+		Name:        name,
+		PhoneNumber: phoneNumber,
+		Purpose:     purpose,
+	}, false)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": fmt.Sprintf("something went wrong: %v", err),
+		})
+	}
+
 	return c.JSON(fiber.Map{
 		"data": &fiber.Map{
-			"url": s3URL,
+			"visitor":   visitor,
+			"photo_url": s3URL,
 		},
 		"success": true,
 	})

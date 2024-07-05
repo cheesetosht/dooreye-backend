@@ -29,9 +29,11 @@ type ResidentCollector struct {
 }
 
 type VisitorCollector struct {
-	Name   string `json:"name"`
-	Mobile string `json:"mobile"`
-	Photo  string `json:"photo"`
+	ID          *int32  `json:"id"`
+	Name        string  `json:"name"`
+	PhoneNumber string  `json:"phone_number"`
+	Photo       *string `json:"photo"`
+	Purpose     string  `json:"purpose"`
 }
 
 type ResidenceVisitCollector struct {

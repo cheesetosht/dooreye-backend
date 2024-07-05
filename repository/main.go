@@ -82,14 +82,18 @@ func BulkInsertResidences(data models.ResidencesCollector) error {
 	return nil
 }
 
-func InsertVisitor(visitor models.VisitorCollector) (int, error) {
-	var id int
-	query := "INSERT INTO visitors (name, mobile, photo) VALUES ($1, $2, $3) RETURNING id"
-	err := db.PGPool.QueryRow(context.Background(), query, visitor.Name, visitor.Mobile, visitor.Photo).Scan(&id)
-	if err != nil {
-		return 0, err
-	}
-	return id, nil
+func InsertVisitor(visitor models.VisitorCollector, isPreapproved bool) (models.VisitorCollector, error) {
+	var visitorResponse models.VisitorCollector
+	query := "INSERT INTO visitors (name, phone_number, photo, purpose, is_preapproved) VALUES ($1, $2, $3, $4, $5) RETURNING id, name, phone_number, photo, purpose"
+	row := db.PGPool.QueryRow(context.Background(), query, visitor.Name, visitor.PhoneNumber, visitor.Photo, visitor.Purpose, isPreapproved)
+	err := row.Scan(
+		&visitorResponse.ID,
+		&visitorResponse.Name,
+		&visitorResponse.PhoneNumber,
+		&visitorResponse.Photo,
+		&visitorResponse.Purpose,
+	)
+	return visitorResponse, err
 }
 
 func GetVisitorByMobile(phoneNumber string) (models.Visitor, error) {

@@ -54,7 +54,7 @@ func main() {
 	app.Post("/societies", handler.CreateSociety, middleware.AuthByRoleLevel(4))
 
 	app.Get("/visitors", handler.GetVisitor, middleware.AuthByRoleLevel(2))
-	app.Post("/visitors", handler.CreateVisitor, middleware.AuthByRoleLevel(2))
+	app.Post("/visitors/from-gate", handler.CreateVisitorFromGate, middleware.AuthByRoleLevel(2))
 
 	// app.Post("/cities", handler.InsertCity)
 	app.Get("/cities", handler.FetchCities, middleware.AuthByRoleLevel(5))
