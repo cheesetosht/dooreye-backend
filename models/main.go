@@ -1,9 +1,9 @@
 package models
 
 import (
-	"database/sql"
 	"database/sql/driver"
 	"fmt"
+	"time"
 )
 
 type ResidenceVisitStatus string
@@ -66,56 +66,56 @@ type City struct {
 }
 
 type Residence struct {
-	ID        int32         `json:"id"`
-	Number    int32         `json:"number"`
-	SocietyID int32         `json:"society_id"`
-	BlockID   sql.NullInt32 `json:"block_id"`
-	CreatedAt sql.NullTime  `json:"created_at"`
-	UpdatedAt sql.NullTime  `json:"updated_at"`
+	ID        int32      `json:"id"`
+	Number    int32      `json:"number"`
+	SocietyID int32      `json:"society_id"`
+	BlockID   *int       `json:"block_id"`
+	CreatedAt *time.Time `json:"created_at"`
+	UpdatedAt *time.Time `json:"updated_at"`
 }
 
 type ResidenceVisit struct {
 	ID          int32                `json:"id"`
 	ResidenceID int32                `json:"residence_id"`
 	Status      ResidenceVisitStatus `json:"status"`
-	ArrivalTime sql.NullTime         `json:"arrival_time"`
-	ExitTime    sql.NullTime         `json:"exit_time"`
+	ArrivalTime *time.Time           `json:"arrival_time"`
+	ExitTime    *time.Time           `json:"exit_time"`
 }
 
 type Society struct {
-	ID              int32        `json:"id"`
-	Name            string       `json:"name"`
-	Developer       string       `json:"developer"`
-	MaxResidences   int32        `json:"max_residences"`
-	CityID          int32        `json:"city_id"`
-	AccessRevokedAt sql.NullTime `json:"access_revoked_at"`
-	CreatedAt       sql.NullTime `json:"created_at"`
-	UpdatedAt       sql.NullTime `json:"updated_at"`
+	ID              int32      `json:"id"`
+	Name            string     `json:"name"`
+	Developer       string     `json:"developer"`
+	MaxResidences   int32      `json:"max_residences"`
+	CityID          int32      `json:"city_id"`
+	AccessRevokedAt *time.Time `json:"access_revoked_at"`
+	CreatedAt       *time.Time `json:"created_at"`
+	UpdatedAt       *time.Time `json:"updated_at"`
 }
 
 type User struct {
-	ID              int32          `json:"id"`
-	Name            sql.NullString `json:"name"`
-	Email           sql.NullString `json:"email"`
-	PhoneNumber     sql.NullString `json:"phone_number"`
-	ResidenceID     sql.NullInt32  `json:"residence_id"`
-	SocietyID       sql.NullInt32  `json:"society_id"`
-	RoleLevel       int32          `json:"role_level"`
-	AccessRevokedAt sql.NullTime   `json:"access_revoked_at"`
-	CreatedAt       sql.NullTime   `json:"created_at"`
-	UpdatedAt       sql.NullTime   `json:"updated_at"`
+	ID              int32      `json:"id"`
+	Name            *string    `json:"name"`
+	Email           *string    `json:"email"`
+	PhoneNumber     *string    `json:"phone_number"`
+	ResidenceID     *int       `json:"residence_id"`
+	SocietyID       *int       `json:"society_id"`
+	RoleLevel       int32      `json:"role_level"`
+	AccessRevokedAt *time.Time `json:"access_revoked_at"`
+	CreatedAt       *time.Time `json:"created_at"`
+	UpdatedAt       *time.Time `json:"updated_at"`
 }
 
 type UserRole struct {
 	Level int32
-	Role  sql.NullString
+	Role  *string
 }
 
 type Visitor struct {
-	ID          int32          `json:"id"`
-	Name        string         `json:"name"`
-	PhoneNumber sql.NullString `json:"phone_number"`
-	Photo       sql.NullString `json:"photo"`
-	CreatedAt   sql.NullTime   `json:"created_at"`
-	UpdatedAt   sql.NullTime   `json:"updated_at"`
+	ID            int32      `json:"id"`
+	Name          string     `json:"name"`
+	PhoneNumber   string     `json:"phone_number"`
+	Photo         *string    `json:"photo"`
+	CreatedAt     *time.Time `json:"created_at"`
+	UpdatedAt     *time.Time `json:"updated_at"`
 }
