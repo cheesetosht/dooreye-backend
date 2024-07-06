@@ -7,6 +7,7 @@ import (
 	"hime-backend/models"
 	"hime-backend/repository"
 	"hime-backend/utility"
+	"net/http"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -372,41 +373,33 @@ func BulkCreateResidences(c fiber.Ctx) error {
 	})
 }
 
-func CreateVisitorFromGate(c fiber.Ctx) error {
-	name := c.FormValue("name")
-	phoneNumber := c.FormValue("phone_number")
-	purpose := c.FormValue("purpose")
-	file, err := c.FormFile("visitor_photo")
+func CreateVisitByVisitorID(c fiber.Ctx) error {
+	var body struct {
+		VisitorID   int `json:"visitor_id"`
+		ResidenceID int `json:"residence_id"`
+	}
 
-	if err != nil {
+	if err := c.Bind().Body(&body); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": "unable to retrieve file",
+			"error": "invalid input",
 		})
 	}
 
-	var filename string
-	if name == "" {
-		filename = phoneNumber
-	} else {
-		filename = name
-	}
-	filename += filepath.Ext(file.Filename)
-	filename = strings.ReplaceAll(filename, " ", "_")
-
-	s3Path := fmt.Sprintf("visitors/%s", filename)
-
-	s3URL, err := utility.UploadFileToS3(file, s3Path, os.Getenv("AWS_S3_BUCKET_NAME"))
+	visitor, err := repository.GetVisitorByID(body.VisitorID)
+	fmt.Println(body.VisitorID)
 	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": fmt.Sprintf("unable to upload image: %v", err),
+		return c.Status(fiber.StatusNotAcceptable).JSON(fiber.Map{
+			"error": "visitor does not exist",
 		})
 	}
 
-	visitor, err := repository.InsertVisitor(models.VisitorCollector{
-		Name:        name,
-		PhoneNumber: phoneNumber,
-		Purpose:     purpose,
-	}, false)
+	var status *models.ResidenceVisitStatus
+	if visitor.IsPreapproved {
+		preapprovedStatus := models.ResidenceVisitStatusPreApproved
+		status = &preapprovedStatus
+	}
+
+	visit, err := repository.InsertResidenceVisit(body.ResidenceID, body.VisitorID, status)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": fmt.Sprintf("something went wrong: %v", err),
@@ -415,13 +408,91 @@ func CreateVisitorFromGate(c fiber.Ctx) error {
 
 	return c.JSON(fiber.Map{
 		"data": &fiber.Map{
-			"visitor":   visitor,
-			"photo_url": s3URL,
+			"visit":   visit,
+			"visitor": visitor,
 		},
 		"success": true,
 	})
 
 }
+
+func CreateVisitForNewVisitor(c fiber.Ctx) error {
+	residenceIDStr := c.FormValue("residence_id")
+	name := c.FormValue("name")
+	phoneNumber := c.FormValue("phone_number")
+	purpose := c.FormValue("purpose")
+	residenceID, err := strconv.Atoi(residenceIDStr)
+
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "invalid residence_id",
+		})
+	}
+
+	var photoURL *string
+
+	file, err := c.FormFile("visitor_photo")
+	if err == nil && file != nil {
+		var filename string
+
+		if name == "" {
+			filename = phoneNumber
+		} else {
+			filename = name
+		}
+		filename += filepath.Ext(file.Filename)
+		filename = strings.ReplaceAll(filename, " ", "_")
+
+		s3Path := fmt.Sprintf("visitors/%s", filename)
+
+		s3URL, err := utility.UploadFileToS3(file, s3Path, os.Getenv("AWS_S3_BUCKET_NAME"))
+		if err != nil {
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+				"error": fmt.Sprintf("unable to upload image: %v", err),
+			})
+		}
+		photoURL = &s3URL
+	} else if err != nil && err != http.ErrMissingFile {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "error processing file upload",
+		})
+	}
+
+	visitor, err := repository.InsertVisitor(models.VisitorCollector{
+		Name:        name,
+		PhoneNumber: phoneNumber,
+		Photo:       photoURL,
+		Purpose:     purpose,
+	}, false)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": fmt.Sprintf("something went wrong: %v", err),
+		})
+	}
+
+	var status *models.ResidenceVisitStatus
+	if *visitor.IsPreapproved {
+		preapprovedStatus := models.ResidenceVisitStatusPreApproved
+		status = &preapprovedStatus
+	}
+
+	visit, err := repository.InsertResidenceVisit(residenceID, int(*visitor.ID), status)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": fmt.Sprintf("something went wrong: %v", err),
+		})
+	}
+
+	return c.JSON(fiber.Map{
+		"data": &fiber.Map{
+			"visit":   visit,
+			"visitor": visitor,
+		},
+		"success": true,
+	})
+
+}
+
 func CreateVisitorFromResidence(c fiber.Ctx) error {
 	name := c.FormValue("name")
 	phoneNumber := c.FormValue("phone_number")

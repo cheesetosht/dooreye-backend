@@ -29,11 +29,12 @@ type ResidentCollector struct {
 }
 
 type VisitorCollector struct {
-	ID          *int32  `json:"id"`
-	Name        string  `json:"name"`
-	PhoneNumber string  `json:"phone_number"`
-	Photo       *string `json:"photo"`
-	Purpose     string  `json:"purpose"`
+	ID            *int32  `json:"id"`
+	Name          string  `json:"name"`
+	PhoneNumber   string  `json:"phone_number"`
+	Photo         *string `json:"photo"`
+	Purpose       string  `json:"purpose"`
+	IsPreapproved *bool   `json:"is_preapproved"`
 }
 
 type ResidenceVisitCollector struct {

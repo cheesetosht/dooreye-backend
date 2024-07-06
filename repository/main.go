@@ -84,7 +84,7 @@ func BulkInsertResidences(data models.ResidencesCollector) error {
 
 func InsertVisitor(visitor models.VisitorCollector, isPreapproved bool) (models.VisitorCollector, error) {
 	var visitorResponse models.VisitorCollector
-	query := "INSERT INTO visitors (name, phone_number, photo, purpose, is_preapproved) VALUES ($1, $2, $3, $4, $5) RETURNING id, name, phone_number, photo, purpose"
+	query := "INSERT INTO visitors (name, phone_number, photo, purpose, is_preapproved) VALUES ($1, $2, $3, $4, $5) RETURNING id, name, phone_number, photo, purpose, is_preapproved"
 	row := db.PGPool.QueryRow(context.Background(), query, visitor.Name, visitor.PhoneNumber, visitor.Photo, visitor.Purpose, isPreapproved)
 	err := row.Scan(
 		&visitorResponse.ID,
@@ -92,8 +92,26 @@ func InsertVisitor(visitor models.VisitorCollector, isPreapproved bool) (models.
 		&visitorResponse.PhoneNumber,
 		&visitorResponse.Photo,
 		&visitorResponse.Purpose,
+		&visitorResponse.IsPreapproved,
 	)
 	return visitorResponse, err
+}
+
+func GetVisitorByID(visitorID int) (models.Visitor, error) {
+	var visitor models.Visitor
+	query := `SELECT id, name, phone_number, photo, purpose, is_preapproved, created_at, updated_at
+	FROM visitors WHERE id = $1`
+	err := db.PGPool.QueryRow(context.Background(), query, visitorID).Scan(
+		&visitor.ID,
+		&visitor.Name,
+		&visitor.PhoneNumber,
+		&visitor.Photo,
+		&visitor.Purpose,
+		&visitor.IsPreapproved,
+		&visitor.CreatedAt,
+		&visitor.UpdatedAt,
+	)
+	return visitor, err
 }
 
 func GetVisitorByMobile(phoneNumber string) (models.Visitor, error) {
@@ -114,10 +132,10 @@ func GetVisitorByMobile(phoneNumber string) (models.Visitor, error) {
 	return visitor, err
 }
 
-func InsertResidenceVisit(visit models.ResidenceVisitCollector) (int, error) {
+func InsertResidenceVisit(residenceID int, visitorID int, visitStatus *models.ResidenceVisitStatus) (int, error) {
 	var id int
-	query := "INSERT INTO visits (residence_id, visitor_id, status) VALUES ($1, $2, $3) RETURNING id"
-	err := db.PGPool.QueryRow(context.Background(), query, visit.ResidenceID, visit.VisitorID, visit.Status).Scan(&id)
+	query := "INSERT INTO residence_visits (residence_id, visitor_id, status) VALUES ($1, $2, $3) RETURNING id"
+	err := db.PGPool.QueryRow(context.Background(), query, residenceID, visitorID, visitStatus).Scan(&id)
 	if err != nil {
 		return 0, err
 	}

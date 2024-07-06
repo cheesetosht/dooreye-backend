@@ -114,6 +114,7 @@ CREATE TABLE visitors
     created_at     TIMESTAMP WITH TIME ZONE    DEFAULT now(),
     updated_at     TIMESTAMP WITH TIME ZONE    DEFAULT now()
 );
+CREATE INDEX idx_phone_number ON visitors (phone_number);
 
 -- visits
 CREATE TYPE residence_visit_status as ENUM ('accepted','rejected','pre-approved','security cleared');

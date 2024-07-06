@@ -51,18 +51,19 @@ func main() {
 	})
 	app.Post("/auth/request-otp", handler.RequestOTP)
 	app.Post("/auth/verify-otp", handler.VerifyOTP)
-	app.Post("/societies", handler.CreateSociety, middleware.AuthByRoleLevel(4))
+	app.Post("/visitors/from-residence", handler.CreateVisitorFromResidence, middleware.AuthByRoleLevel(1))
 
 	app.Get("/visitors", handler.GetVisitor, middleware.AuthByRoleLevel(2))
-	app.Post("/visitors/from-gate", handler.CreateVisitorFromGate, middleware.AuthByRoleLevel(2))
-	app.Post("/visitors/from-residence", handler.CreateVisitorFromGate, middleware.AuthByRoleLevel(1))
+	app.Post("/visits", handler.CreateVisitByVisitorID, middleware.AuthByRoleLevel(2))
+	app.Post("/visits/new", handler.CreateVisitForNewVisitor, middleware.AuthByRoleLevel(2))
 
+	app.Post("/users/resident-bulk", handler.BulkCreateResidentUser, middleware.AuthByRoleLevel(4))
 	// app.Post("/cities", handler.InsertCity)
+	app.Post("/societies", handler.CreateSociety, middleware.AuthByRoleLevel(5))
 	app.Get("/cities", handler.FetchCities, middleware.AuthByRoleLevel(5))
 	app.Get("/societies", handler.FetchSocieties, middleware.AuthByRoleLevel(5))
 	app.Post("/blocks/bulk", handler.BulkCreateBlocks, middleware.AuthByRoleLevel(5))
 	app.Post("/residences/bulk", handler.BulkCreateResidences, middleware.AuthByRoleLevel(5))
-	app.Post("/users/resident-bulk", handler.BulkCreateResidentUser, middleware.AuthByRoleLevel(4))
 
 	go func() {
 		if err := app.Listen(":" + os.Getenv("PORT")); err != nil {
