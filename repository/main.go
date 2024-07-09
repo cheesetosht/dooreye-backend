@@ -141,3 +141,8 @@ func InsertResidenceVisit(residenceID int, visitorID int, visitStatus *models.Re
 	}
 	return id, nil
 }
+
+func UpdateResidenceVisitStatus(id int, visitStatus *models.ResidenceVisitStatus) {
+	query := "UPDATE residence_visits SET status = $2 WHERE id = $1"
+	db.PGPool.QueryRow(context.Background(), query, id, visitStatus)
+}

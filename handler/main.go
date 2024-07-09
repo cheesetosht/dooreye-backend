@@ -543,6 +543,32 @@ func GetVisitor(c fiber.Ctx) error {
 	})
 }
 
+func ChangeVisitStatus(c fiber.Ctx) error {
+	var body struct {
+		Status models.ResidenceVisitStatus `json:"status"`
+	}
+
+	if err := c.Bind().Body(&body); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "invalid input",
+		})
+	}
+
+	id, err := strconv.Atoi(c.Params("id"))
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "invalid id parameter",
+		})
+	}
+
+	repository.UpdateResidenceVisitStatus(id, &body.Status)
+
+	return c.JSON(fiber.Map{
+		"success": true,
+	})
+
+}
+
 func SendPushNotification(c fiber.Ctx) error {
 	var data struct {
 		Token string `json:"token"`

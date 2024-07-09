@@ -32,6 +32,9 @@ func AuthByRoleLevel(roleLevel int) fiber.Handler {
 		if isValid {
 			c.Locals("user_id", claims.UserID)
 			c.Locals("role_level", claims.RoleLevel)
+			if roleLevel == 1 {
+				c.Locals("residence_id", claims.ResidenceID)
+			}
 			return c.Next()
 		}
 

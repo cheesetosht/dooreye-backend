@@ -54,6 +54,7 @@ func main() {
 	app.Post("/auth/request-otp", handler.RequestOTP)
 	app.Post("/auth/verify-otp", handler.VerifyOTP)
 	app.Post("/visitors/from-residence", handler.CreateVisitorFromResidence, middleware.AuthByRoleLevel(1))
+	app.Patch("/visits/:id/status", handler.ChangeVisitStatus, middleware.AuthByRoleLevel(1))
 
 	app.Get("/visitors", handler.GetVisitor, middleware.AuthByRoleLevel(2))
 	app.Post("/visits", handler.CreateVisitByVisitorID, middleware.AuthByRoleLevel(2))
