@@ -98,8 +98,8 @@ type User struct {
 	Name            *string    `json:"name"`
 	Email           *string    `json:"email"`
 	PhoneNumber     *string    `json:"phone_number"`
-	ResidenceID     *int       `json:"residence_id"`
-	SocietyID       *int       `json:"society_id"`
+	ResidenceID     *int32     `json:"residence_id"`
+	SocietyID       *int32     `json:"society_id"`
 	RoleLevel       int32      `json:"role_level"`
 	AccessRevokedAt *time.Time `json:"access_revoked_at"`
 	CreatedAt       *time.Time `json:"created_at"`

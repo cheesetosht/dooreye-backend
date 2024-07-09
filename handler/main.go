@@ -132,7 +132,7 @@ func VerifyOTP(c fiber.Ctx) error {
 		})
 	}
 
-	token, err := utility.CreateJWTToken(utility.JWTAuthClaims{UserID: user.ID, RoleLevel: user.RoleLevel})
+	token, err := utility.CreateJWTToken(utility.JWTAuthClaims{UserID: user.ID, RoleLevel: user.RoleLevel, ResidenceID: *user.ResidenceID})
 
 	return c.JSON(&fiber.Map{
 		"data": &fiber.Map{

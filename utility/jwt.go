@@ -8,8 +8,9 @@ import (
 )
 
 type JWTAuthClaims struct {
-	UserID    int32 `json:"user_id"`
-	RoleLevel int32 `json:"role_level"`
+	UserID      int32 `json:"user_id"`
+	RoleLevel   int32 `json:"role_level"`
+	ResidenceID int32 `json:"residence_id"`
 	jwt.RegisteredClaims
 }
 
