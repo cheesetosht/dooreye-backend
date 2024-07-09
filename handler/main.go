@@ -7,6 +7,7 @@ import (
 	"hime-backend/models"
 	"hime-backend/repository"
 	"hime-backend/utility"
+	"log"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -14,6 +15,7 @@ import (
 	"strings"
 	"time"
 
+	"firebase.google.com/go/messaging"
 	"github.com/gofiber/fiber/v3"
 	"github.com/jackc/pgx/v5"
 )
@@ -538,5 +540,42 @@ func GetVisitor(c fiber.Ctx) error {
 		"data":    visitor,
 		"error":   nil,
 		"success": true,
+	})
+}
+
+func SendPushNotification(c fiber.Ctx) error {
+	var data struct {
+		Token string `json:"token"`
+		Title string `json:"title"`
+		Body  string `json:"body"`
+	}
+
+	if err := c.Bind().Body(&data); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "cannot parse JSON",
+		})
+	}
+
+	message := &messaging.Message{
+		Notification: &messaging.Notification{
+			Title: data.Title,
+			Body:  data.Body,
+		},
+		Token: data.Token,
+	}
+
+	client := utility.GetFirebaseMessagingClient()
+
+	response, err := client.Send(c.Context(), message)
+	if err != nil {
+		log.Printf("!! error sending push notification: %v\n", err)
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "failed to send notification",
+		})
+	}
+
+	return c.JSON(fiber.Map{
+		"message":  "push notification sent successfully",
+		"response": response,
 	})
 }

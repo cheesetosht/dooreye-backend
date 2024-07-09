@@ -31,6 +31,8 @@ func main() {
 	// database connection
 	db.InitPG()
 
+	_ = utility.GetFirebaseApp()
+
 	// router
 	app := fiber.New()
 	app.Use(logger.New())
@@ -64,6 +66,8 @@ func main() {
 	app.Get("/societies", handler.FetchSocieties, middleware.AuthByRoleLevel(5))
 	app.Post("/blocks/bulk", handler.BulkCreateBlocks, middleware.AuthByRoleLevel(5))
 	app.Post("/residences/bulk", handler.BulkCreateResidences, middleware.AuthByRoleLevel(5))
+
+	app.Post("/push-notifications", handler.SendPushNotification, middleware.AuthByRoleLevel(5))
 
 	go func() {
 		if err := app.Listen(":" + os.Getenv("PORT")); err != nil {
