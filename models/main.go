@@ -121,3 +121,17 @@ type Visitor struct {
 	CreatedAt     *time.Time `json:"created_at"`
 	UpdatedAt     *time.Time `json:"updated_at"`
 }
+
+type UserInfo struct {
+	ID              int32      `json:"id"`
+	Name            *string    `json:"name"`
+	Email           *string    `json:"email"`
+	PhoneNumber     *string    `json:"phone_number"`
+	ResidenceID     *int32     `json:"residence_id"`
+	SocietyID       *int32     `json:"society_id"`
+	CreatedAt       *time.Time `json:"created_at"`
+	ResidenceNumber *int32     `json:"residence_number"`
+	Block           *string    `json:"block"`
+	SocietyName     *string    `json:"society_name"`
+	CityName        *string    `json:"city_name"`
+}

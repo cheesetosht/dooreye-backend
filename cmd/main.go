@@ -53,6 +53,11 @@ func main() {
 	})
 	app.Post("/auth/request-otp", handler.RequestOTP)
 	app.Post("/auth/verify-otp", handler.VerifyOTP)
+
+	app.Get("/auth/resident", handler.VerifyToken, middleware.AuthByRoleLevel(1))
+	app.Get("/auth/security", handler.VerifyToken, middleware.AuthByRoleLevel(2))
+	app.Get("/auth/operator", handler.VerifyToken, middleware.AuthByRoleLevel(3))
+
 	app.Post("/visitors/from-residence", handler.CreateVisitorFromResidence, middleware.AuthByRoleLevel(1))
 	app.Patch("/visits/:id/status", handler.ChangeVisitStatus, middleware.AuthByRoleLevel(1))
 
@@ -68,7 +73,7 @@ func main() {
 	app.Post("/blocks/bulk", handler.BulkCreateBlocks, middleware.AuthByRoleLevel(5))
 	app.Post("/residences/bulk", handler.BulkCreateResidences, middleware.AuthByRoleLevel(5))
 
-	app.Post("/push-notifications", handler.SendPushNotification, middleware.AuthByRoleLevel(5))
+	app.Post("/push-notifications", handler.SendPushNotification)
 
 	go func() {
 		if err := app.Listen(":" + os.Getenv("PORT")); err != nil {

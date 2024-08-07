@@ -28,13 +28,9 @@ func AuthByRoleLevel(roleLevel int) fiber.Handler {
 			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "invalid or expired token"})
 		}
 
-		isValid, err := repository.CheckAuthByID(int(claims.UserID), roleLevel)
-		if isValid {
-			c.Locals("user_id", claims.UserID)
-			c.Locals("role_level", claims.RoleLevel)
-			if roleLevel == 1 {
-				c.Locals("residence_id", claims.ResidenceID)
-			}
+		userInfo, err := repository.GetUserInfoByIDAndRoleLevel(int(claims.UserID), roleLevel)
+		if err == nil {
+			c.Locals("user_info", userInfo)
 			return c.Next()
 		}
 

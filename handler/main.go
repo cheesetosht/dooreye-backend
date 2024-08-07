@@ -146,6 +146,23 @@ func VerifyOTP(c fiber.Ctx) error {
 	})
 }
 
+func VerifyToken(c fiber.Ctx) error {
+	localsUserInfo := c.Locals("user_info")
+
+	userInfo, ok := localsUserInfo.(*models.UserInfo)
+	if !ok {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "invalid user ID",
+		})
+	}
+
+	return c.JSON(&fiber.Map{
+		"data": &fiber.Map{
+			"user_info": userInfo,
+		},
+	})
+}
+
 func CreateCity(c fiber.Ctx) error {
 	var city models.City
 
@@ -566,7 +583,6 @@ func ChangeVisitStatus(c fiber.Ctx) error {
 	return c.JSON(fiber.Map{
 		"success": true,
 	})
-
 }
 
 func SendPushNotification(c fiber.Ctx) error {

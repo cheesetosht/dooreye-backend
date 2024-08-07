@@ -49,6 +49,7 @@ func GetAuthSecret(phoneNumber, email *string) (string, int, error) {
 	query := "SELECT secret, id FROM auth_secrets WHERE " + identifierKey + " = $1 AND is_used = FALSE AND expires_at > NOW() ORDER BY id DESC LIMIT 1;"
 	err := db.PGPool.QueryRow(context.Background(), query, identifier).Scan(&secret, &id)
 	if err != nil {
+		fmt.Println("OTP", err)
 		return "", 0, fmt.Errorf("!! failed to fetch auth secret: %s", err)
 	}
 	return secret, id, nil
@@ -59,6 +60,27 @@ func MarkAuthSecretAsUsed(id int) error {
 	db.PGPool.QueryRow(context.Background(), query, id)
 	log.Println("> delete from auth_secrets, id: ", id)
 	return nil
+}
+
+func GetUserByID(id int32) (models.User, error) {
+	var (
+		user models.User
+	)
+
+	query := "SELECT * FROM users WHERE id = $1 AND access_revoked_at IS NULL;"
+	err := db.PGPool.QueryRow(context.Background(), query, id).Scan(
+		&user.ID,
+		&user.Name,
+		&user.Email,
+		&user.PhoneNumber,
+		&user.ResidenceID,
+		&user.SocietyID,
+		&user.RoleLevel,
+		&user.AccessRevokedAt,
+		&user.CreatedAt,
+		&user.UpdatedAt,
+	)
+	return user, err
 }
 
 func GetUserByPhoneNumberOrEmail(phoneNumber, email *string) (models.User, error) {
@@ -89,40 +111,47 @@ func GetUserByPhoneNumberOrEmail(phoneNumber, email *string) (models.User, error
 	return user, err
 }
 
-func CheckAuthByID(id int, roleLevel int) (bool, error) {
-	var exists bool
+var getUserInfoQuery = `SELECT u.id,
+       u.name,
+       u.email,
+       u.phone_number,
+       u.residence_id,
+       u.society_id,
+       u.created_at,
+       rc.number residence_number,
+       bl.name block,
+       sc.name society_name,
+       ct.name city_name
+FROM users u
+         INNER JOIN residences rc ON rc.id = u.residence_id
+         INNER JOIN societies sc ON sc.id = rc.society_id
+         INNER JOIN blocks bl ON bl.id = rc.block_id
+         INNER JOIN cities ct ON ct.id = sc.city_id
+WHERE sc.access_revoked_at IS NULL
+  AND u.access_revoked_at IS NULL
+  AND u.id = $1 AND u.role_level = $2
+LIMIT 1`
 
-	if roleLevel == 1 {
-		query := `SELECT EXISTS(
-		SELECT 1
-		    FROM users u
-		            INNER JOIN residences rc ON rc.id = u.residence_id
-		            INNER JOIN societies sc ON sc.id = rc.society_id
-		    WHERE u.role_level = 1
-		    AND sc.access_revoked_at IS NULL
-		    AND u.access_revoked_at IS NULL
-		    AND u.id = $1);`
-		err := db.PGPool.QueryRow(context.Background(), query, id).Scan(&exists)
-		if err != nil {
-			return false, err
-		}
-		return exists, nil
-	} else if roleLevel > 1 && roleLevel < 5 {
-		query := `SELECT EXISTS(SELECT 1
-		    FROM users u
-		            INNER JOIN societies sc ON sc.id = u.society_id
-		    WHERE u.role_level > 1
-		    AND u.role_level <= 5
-		    AND sc.access_revoked_at IS NULL
-		    AND u.access_revoked_at IS NULL
-		    AND u.id = $1);`
-		err := db.PGPool.QueryRow(context.Background(), query, id).Scan(&exists)
-		if err != nil {
-			return false, err
-		}
-		return exists, nil
+func GetUserInfoByIDAndRoleLevel(id int, roleLevel int) (*models.UserInfo, error) {
+	var i models.UserInfo
+	err := db.PGPool.QueryRow(context.Background(), getUserInfoQuery, id, roleLevel).Scan(
+		&i.ID,
+		&i.Name,
+		&i.Email,
+		&i.PhoneNumber,
+		&i.ResidenceID,
+		&i.SocietyID,
+		&i.CreatedAt,
+		&i.ResidenceNumber,
+		&i.Block,
+		&i.SocietyName,
+		&i.CityName,
+	)
+
+	if err != nil {
+		return nil, fmt.Errorf("!! failed to collecting user info: %w", err)
 	}
-	return false, nil
+	return &i, err
 }
 
 func BulkInsertResidentUsers(data []models.ResidentUserCollector) error {
