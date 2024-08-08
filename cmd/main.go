@@ -22,7 +22,16 @@ func init() {
 	if err != nil {
 		log.Fatalf("!! error loading .env file")
 	}
-	envVars := []string{"PORT", "DATABASE_URL", "JWT_SECRET", "AWS_REGION", "AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY", "AWS_S3_BUCKET_NAME"}
+	envVars := []string{
+		"PORT",
+		"DATABASE_URL",
+		"JWT_SECRET",
+		"AWS_REGION",
+		"AWS_ACCESS_KEY_ID",
+		"AWS_SECRET_ACCESS_KEY",
+		"AWS_S3_BUCKET_NAME",
+		"FIREBASE_PROJECT_ID",
+	}
 	utility.ValidateEnv(envVars)
 	log.Println("> start program")
 }
