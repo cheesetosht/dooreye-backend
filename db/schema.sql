@@ -114,7 +114,7 @@ CREATE TABLE visitors
     created_at     TIMESTAMP WITH TIME ZONE    DEFAULT now(),
     updated_at     TIMESTAMP WITH TIME ZONE    DEFAULT now()
 );
-CREATE INDEX idx_phone_number ON visitors (phone_number);
+CREATE INDEX idx_visitor_phone_number ON visitors (phone_number);
 
 -- visits
 CREATE TYPE residence_visit_status as ENUM ('accepted','rejected','pre-approved','security cleared');
@@ -142,6 +142,6 @@ CREATE TABLE auth_secrets
     created_at   TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE INDEX idx_phone_number ON auth_secrets (phone_number);
-CREATE INDEX idx_email ON auth_secrets (email);
-CREATE INDEX idx_expires_at ON auth_secrets (expires_at);
+CREATE INDEX idx_auth_secret_phone_number ON auth_secrets (phone_number);
+CREATE INDEX idx_auth_secret_email ON auth_secrets (email);
+CREATE INDEX idx_auth_secret_expires_at ON auth_secrets (expires_at);
