@@ -124,10 +124,10 @@ var getUserInfoQuery = `SELECT u.id,
        ct.name city_name,
        u.role_level
 FROM users u
-         INNER JOIN residences rc ON rc.id = u.residence_id
-         INNER JOIN societies sc ON sc.id = rc.society_id
-         INNER JOIN blocks bl ON bl.id = rc.block_id
-         INNER JOIN cities ct ON ct.id = sc.city_id
+         LEFT JOIN residences rc ON rc.id = u.residence_id
+         LEFT JOIN societies sc ON sc.id = rc.society_id
+         LEFT JOIN blocks bl ON bl.id = rc.block_id
+         LEFT JOIN cities ct ON ct.id = sc.city_id
 WHERE sc.access_revoked_at IS NULL
   AND u.access_revoked_at IS NULL
   AND u.id = $1 AND u.role_level >= $2

@@ -1,7 +1,9 @@
 tmp
-.env
+.env*
 .dev.firebase.json
 .firebase.json
 docker-compose.yml
 
 .DS_Store
+
+api
