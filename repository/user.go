@@ -121,7 +121,8 @@ var getUserInfoQuery = `SELECT u.id,
        rc.number residence_number,
        bl.name block,
        sc.name society_name,
-       ct.name city_name
+       ct.name city_name,
+       u.role_level
 FROM users u
          INNER JOIN residences rc ON rc.id = u.residence_id
          INNER JOIN societies sc ON sc.id = rc.society_id
@@ -129,7 +130,7 @@ FROM users u
          INNER JOIN cities ct ON ct.id = sc.city_id
 WHERE sc.access_revoked_at IS NULL
   AND u.access_revoked_at IS NULL
-  AND u.id = $1 AND u.role_level = $2
+  AND u.id = $1 AND u.role_level >= $2
 LIMIT 1`
 
 func GetUserInfoByIDAndRoleLevel(id int, roleLevel int) (*models.UserInfo, error) {
@@ -146,6 +147,7 @@ func GetUserInfoByIDAndRoleLevel(id int, roleLevel int) (*models.UserInfo, error
 		&i.Block,
 		&i.SocietyName,
 		&i.CityName,
+		&i.RoleLevel,
 	)
 
 	if err != nil {

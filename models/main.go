@@ -134,4 +134,5 @@ type UserInfo struct {
 	Block           *string    `json:"block"`
 	SocietyName     *string    `json:"society_name"`
 	CityName        *string    `json:"city_name"`
+	RoleLevel       *int32     `json:"role_level"`
 }
