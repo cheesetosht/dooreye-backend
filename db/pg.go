@@ -37,6 +37,7 @@ func config() *pgxpool.Config {
 	dbConfig.MaxConnIdleTime = defaultMaxConnIdleTime
 	dbConfig.HealthCheckPeriod = defaultHealthCheckPeriod
 	dbConfig.ConnConfig.ConnectTimeout = defaultConnectTimeout
+	dbConfig.ConnConfig.DefaultQueryExecMode = pgx.QueryExecModeCacheDescribe
 
 	dbConfig.BeforeAcquire = func(ctx context.Context, c *pgx.Conn) bool {
 		log.Println("> before conn. pool acquire")

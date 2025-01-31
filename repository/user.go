@@ -120,15 +120,16 @@ var getUserInfoQuery = `SELECT u.id,
        u.created_at,
        rc.number residence_number,
        bl.name block,
-       sc.name society_name,
+       COALESCE(sc1.name, sc2.name) society_name,
        ct.name city_name,
        u.role_level
 FROM users u
          LEFT JOIN residences rc ON rc.id = u.residence_id
-         LEFT JOIN societies sc ON sc.id = rc.society_id
+         LEFT JOIN societies sc1 ON sc1.id = rc.society_id
+         LEFT JOIN societies sc2 ON sc2.id = u.society_id
          LEFT JOIN blocks bl ON bl.id = rc.block_id
-         LEFT JOIN cities ct ON ct.id = sc.city_id
-WHERE sc.access_revoked_at IS NULL
+         LEFT JOIN cities ct ON ct.id = sc1.city_id
+WHERE sc1.access_revoked_at IS NULL
   AND u.access_revoked_at IS NULL
   AND u.id = $1 AND u.role_level >= $2
 LIMIT 1`

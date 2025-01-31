@@ -19,7 +19,7 @@ func AuthByRoleLevel(roleLevel int) fiber.Handler {
 	return func(c fiber.Ctx) error {
 		authHeader := c.Get("Authorization")
 		if authHeader == "" {
-			return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "missing authorization header"})
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "missing authorization header"})
 		}
 		tokenString := strings.TrimPrefix(authHeader, "Bearer ")
 

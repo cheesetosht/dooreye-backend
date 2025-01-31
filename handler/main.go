@@ -591,9 +591,7 @@ func ChangeVisitStatus(c fiber.Ctx) error {
 
 func SendPushNotification(c fiber.Ctx) error {
 	var data struct {
-		Token string `json:"token"`
-		Title string `json:"title"`
-		Body  string `json:"body"`
+		Tokens []string `json:"token"`
 	}
 
 	if err := c.Bind().Body(&data); err != nil {
@@ -602,17 +600,21 @@ func SendPushNotification(c fiber.Ctx) error {
 		})
 	}
 
-	message := &messaging.Message{
-		Notification: &messaging.Notification{
-			Title: data.Title,
-			Body:  data.Body,
+	message := &messaging.MulticastMessage{
+		Tokens: data.Tokens,
+		Data: map[string]string{
+			"type":               utility.PNTypeResidenceVisit,
+			"residence_visit_id": "2",
+			"purpose":            "Love",
+			"visitor_name":       "Gugloo",
+			"phone_number":       "911",
+			"arrival_time":       "2024-07-06 20:43:28.173305 +00:00",
 		},
-		Token: data.Token,
 	}
 
 	client := utility.GetFirebaseMessagingClient()
 
-	response, err := client.Send(c.Context(), message)
+	response, err := client.SendMulticast(c.Context(), message)
 	if err != nil {
 		log.Printf("!! error sending push notification: %v\n", err)
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
