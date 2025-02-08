@@ -1,0 +1,10 @@
+name = "dooreye-backend"
+compatibility_flags = ["nodejs_compat"]
+compatibility_date = "2024-09-23"
+main = "./src/index.ts"
+
+[env.development]
+name = "dooreye-backend-dev"
+
+[env.production]
+name = "dooreye-backend"

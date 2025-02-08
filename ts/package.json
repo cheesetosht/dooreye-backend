@@ -1,15 +1,18 @@
 {
-  "name": "ts",
-  "version": "1.0.50",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "bun run --watch src/index.ts"
-  },
-  "dependencies": {
-    "elysia": "latest"
-  },
-  "devDependencies": {
-    "bun-types": "latest"
-  },
-  "module": "src/index.js"
+	"name": "ts",
+	"version": "1.0.50",
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1",
+		"dev": "bun wrangler dev",
+		"deploy:dev": "wrangler deploy --minify src/index.ts --env development",
+		"deploy:prod": "wrangler deploy --minify src/index.ts --env production"
+	},
+	"dependencies": {
+		"elysia": "latest",
+		"wrangler": "^3.107.3"
+	},
+	"devDependencies": {
+		"bun-types": "latest"
+	},
+	"module": "src/index.js"
 }
